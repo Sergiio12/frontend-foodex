@@ -1,0 +1,178 @@
+/* Estilos generales */
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Cambiado de center a flex-start */
+  height: 100vh; /* Ocupa toda la altura de la ventana */
+  width: 100vw; /* Ocupa toda la anchura de la ventana */
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Centra horizontalmente pero se ajusta a la parte superior */
+  width: 100%;
+  height: 100%;
+  padding: 0 20px; /* Asegura márgenes laterales */
+  margin-top: 100px; /* Aumentado el espacio superior */
+}
+
+.login-card {
+  background: #f5f5f5; /* Gris claro */
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-out;
+  margin: auto;
+}
+
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Mensaje de error */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #c62828;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Formulario */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Aseguramos que ambos inputs (usuario y contraseña) tengan el mismo tamaño */
+.form-input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%; /* Asegura que ambos campos tengan el mismo ancho */
+  box-sizing: border-box; /* Asegura que el padding no afecte el tamaño total del campo */
+}
+
+/* Campo de usuario y contraseña */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Si prefieres un tamaño fijo */
+.form-input {
+  width: 100%; /* Asegura que el input ocupe todo el ancho disponible */
+  max-width: 600px; /* Puedes ajustar este valor si prefieres un tamaño específico */
+  height: 45px; /* Fija la altura de los campos */
+  padding: 0.75rem; /* Relleno para que el texto esté bien centrado */
+  font-size: 1rem; /* Tamaño de texto */
+}
+
+
+.input-error {
+  border-color: #e74c3c;
+}
+
+.error-text {
+  font-size: 0.85rem;
+  color: #e74c3c;
+  margin-top: 0.25rem;
+}
+
+/* Campo de contraseña */
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #6a11cb;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #2575fc;
+}
+
+/* Botón de envío */
+.login-button {
+  background-color: #6a11cb;
+  color: #fff;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+}
+
+.login-button:hover {
+  background-color: #2575fc;
+  transform: translateY(-2px);
+}
+
+.login-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Enlace de registro */
+.register-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.register-link a {
+  color: #6a11cb;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+  color: #2575fc;
+  text-decoration: underline;
+}
+
+/* Animación */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
