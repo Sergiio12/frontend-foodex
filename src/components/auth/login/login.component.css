@@ -2,9 +2,9 @@
 :host {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Cambiado de center a flex-start */
-  height: 100vh; /* Ocupa toda la altura de la ventana */
-  width: 100vw; /* Ocupa toda la anchura de la ventana */
+  align-items: flex-start;
+  height: 100vh;
+  width: 100vw;
   background: linear-gradient(135deg, #6a11cb, #2575fc);
   margin: 0;
   padding: 0;
@@ -14,15 +14,15 @@
 .login-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Centra horizontalmente pero se ajusta a la parte superior */
+  align-items: flex-start;
   width: 100%;
   height: 100%;
-  padding: 0 20px; /* Asegura márgenes laterales */
-  margin-top: 100px; /* Aumentado el espacio superior */
+  padding: 0 20px;
+  margin-top: 100px;
 }
 
 .login-card {
-  background: #f5f5f5; /* Gris claro */
+  background: #f5f5f5;
   border-radius: 15px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -33,7 +33,6 @@
   margin: auto;
 }
 
-
 .login-title {
   font-size: 2rem;
   font-weight: 700;
@@ -42,16 +41,47 @@
   margin-bottom: 1.5rem;
 }
 
-/* Mensaje de error */
+/* Mensaje de error con opción de cerrar */
 .error-message {
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #c62828;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
-  text-align: center;
+  text-align: center; /* Centra el texto */
   font-weight: bold;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra el contenido (mensaje) */
+  gap: 1rem;
+}
+
+.error-message p {
+  margin: 0;
+  font-size: 1rem;
+  flex-grow: 1;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #721c24;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+  color: #6a11cb;
+}
+
+.close-btn:focus {
+  outline: none;
 }
 
 /* Formulario */
@@ -61,33 +91,21 @@
   gap: 1.5rem;
 }
 
-/* Aseguramos que ambos inputs (usuario y contraseña) tengan el mismo tamaño */
 .form-input {
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  width: 100%; /* Asegura que ambos campos tengan el mismo ancho */
-  box-sizing: border-box; /* Asegura que el padding no afecte el tamaño total del campo */
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Campo de usuario y contraseña */
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
-/* Si prefieres un tamaño fijo */
-.form-input {
-  width: 100%; /* Asegura que el input ocupe todo el ancho disponible */
-  max-width: 600px; /* Puedes ajustar este valor si prefieres un tamaño específico */
-  height: 45px; /* Fija la altura de los campos */
-  padding: 0.75rem; /* Relleno para que el texto esté bien centrado */
-  font-size: 1rem; /* Tamaño de texto */
-}
-
 
 .input-error {
   border-color: #e74c3c;

@@ -16,7 +16,7 @@ import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  errorMessage: string = '';
+  errorMessage: string | null = '';
   submitted = false;
   loading = false;
   showPassword = false;
@@ -50,9 +50,13 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
+  closeErrorMessage() {
+    this.errorMessage = ''; // Esto ocultará el mensaje de error
+  }
+
   onSubmit(): void {
     this.submitted = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     if (this.loginForm.invalid) {
       //this.errorMessage = 'Por favor, completa todos los campos correctamente.';
@@ -66,15 +70,14 @@ export class LoginComponent {
       next: (response) => {
         if (response.status === 'success' && response.data?.token) {
           localStorage.setItem('token', response.data.token);
-          this.router.navigate(['/dashboard']);
+          //this.router.navigate(['/dashboard']);
         } else {
-          this.errorMessage = response.message || 'Error en la autenticación.';
+          this.errorMessage = response.message || 'Error en la autenticación. Contacta con un administrador.';
         }
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error en login', error);
-        this.errorMessage = error.error?.message || 'Error de conexión con el servidor.';
+        this.errorMessage = error.error?.message || 'Error de conexión con el servidor. Inténtalo más tarde o contacta con un administrador.';
         this.loading = false;
       },
     });

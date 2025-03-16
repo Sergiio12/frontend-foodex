@@ -2,12 +2,16 @@
   <div class="login-card">
     <h2 class="login-title">Iniciar Sesión</h2>
 
+    <!-- Mensaje de error con la opción de cerrar -->
     <div *ngIf="errorMessage" class="error-message">
+      <button class="close-btn" (click)="closeErrorMessage()">×</button>
       {{ errorMessage }}
     </div>
 
+    <!-- Formulario de login -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-      <!-- Campo Usuario -->
+      
+      <!-- Campo de usuario -->
       <div class="form-group">
         <label for="username" class="form-label">Nombre de Usuario</label>
         <input
@@ -24,7 +28,7 @@
         </div>
       </div>
 
-      <!-- Campo Contraseña -->
+      <!-- Campo de contraseña -->
       <div class="form-group">
         <label for="password" class="form-label">Contraseña</label>
         <div class="password-input">
@@ -42,7 +46,7 @@
             (click)="togglePassword()"
             [title]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
           >
-            <fa-icon [icon]="showPassword ? faEyeSlash : faEye"></fa-icon>
+            <fa-icon [icon]="showPassword ? faEyeSlash : faEye" [style.color]="'#6a11cb'"></fa-icon>
           </button>
         </div>
         <div *ngIf="password.invalid && (password.touched || submitted)" class="error-text">
@@ -60,8 +64,9 @@
       </button>
     </form>
 
+    <!-- Enlace de registro -->
     <div class="register-link">
-      ¿No tienes cuenta? <a routerLink="/registro">Regístrate</a>
+      ¿No tienes cuenta? <a routerLink="/signup">Regístrate</a>
     </div>
   </div>
 </div>
