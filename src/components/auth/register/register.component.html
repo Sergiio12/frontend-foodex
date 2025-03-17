@@ -59,6 +59,31 @@
             <span *ngIf="password.errors?.['maxlength']">La contraseña no puede tener más de 100 caracteres.</span>
           </div>
         </div>
+
+        <!-- Confirmar Contraseña -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar contraseña</label>
+          <div class="password-input-container">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              class="form-input"
+              placeholder="Confirma tu contraseña"
+              maxlength="100"
+            />
+            <fa-icon
+              [icon]="showConfirmPassword ? faEyeSlash : faEye"
+              class="password-toggle-icon"
+              (click)="toggleConfirmPassword()"
+            ></fa-icon>
+          </div>
+          <div *ngIf="confirmPassword.invalid && submitted" class="error-text">
+            <span *ngIf="confirmPassword.errors?.['required']">Debes confirmar tu contraseña.</span>
+            <span *ngIf="confirmPassword.errors?.['mustMatch']">Las contraseñas no coinciden.</span>
+          </div>
+        </div>
+
   
         <!-- Botón de registro -->
         <button type="submit" class="register-button" [disabled]="loading">

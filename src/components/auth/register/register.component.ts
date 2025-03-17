@@ -1,11 +1,11 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { SignupRequest } from '../../../model/SignupRequest'; // Importa el modelo SignupRequest
+import { SignupRequest } from '../../../model/SignupRequest';
 
 @Component({
   selector: 'app-register',
@@ -21,8 +21,8 @@ export class RegisterComponent {
   submitted = false;
   loading = false;
   showPassword = false;
+  showConfirmPassword = false;
 
-  // Iconos de FontAwesome
   faSpinner = faSpinner;
   faEye = faEye;
   faEyeSlash = faEyeSlash;
@@ -32,68 +32,74 @@ export class RegisterComponent {
     private authService: AuthService,
     private router: Router
   ) {
-    this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(4)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
-    });
+    this.registerForm = this.fb.group(
+      {
+        username: ['', [Validators.required, Validators.minLength(4)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
+        confirmPassword: ['', Validators.required],
+      },
+      { validators: this.mustMatch('password', 'confirmPassword') }
+    );
   }
 
-  // Getters para acceder a los controles
-  get username() {
-    return this.registerForm.get('username')!;
-  }
-
-  get email() {
-    return this.registerForm.get('email')!;
-  }
-
-  get password() {
-    return this.registerForm.get('password')!;
-  }
+  get username() { return this.registerForm.get('username')!; }
+  get email() { return this.registerForm.get('email')!; }
+  get password() { return this.registerForm.get('password')!; }
+  get confirmPassword() { return this.registerForm.get('confirmPassword')!; }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
   closeErrorMessage() {
-    this.errorMessage = ''; // Esto ocultará el mensaje de error
+    this.errorMessage = '';
+  }
+
+  mustMatch(controlName: string, matchingControlName: string) {
+    return (formGroup: AbstractControl) => {
+      const control = formGroup.get(controlName);
+      const matchingControl = formGroup.get(matchingControlName);
+
+      if (!control || !matchingControl) return;
+
+      if (matchingControl.errors && !matchingControl.errors['mustMatch']) {
+        return;
+      }
+
+      matchingControl.setErrors(control.value !== matchingControl.value ? { mustMatch: true } : null);
+    };
   }
 
   onSubmit(): void {
     this.submitted = true;
+    if (this.registerForm.invalid) return;
+
+    this.loading = true;
     this.errorMessage = null;
 
-    // Verifica si el formulario es inválido
-    if (this.registerForm.invalid) {
-      return; // Detiene el envío si el formulario es inválido
-    }
-
-    this.loading = true; // Activa el estado de "cargando"
-
-    // Obtiene los datos del formulario y los mapea al modelo SignupRequest
     const registerData: SignupRequest = {
       username: this.registerForm.value.username,
       email: this.registerForm.value.email,
       password: this.registerForm.value.password,
     };
 
-    // Llama al servicio de autenticación para registrar al usuario
     this.authService.register(registerData).subscribe({
       next: (response) => {
+        this.loading = false;
         if (response.status === 'success') {
-          // Redirige al usuario a la página de login después del registro
           this.router.navigate(['/login']);
         } else {
-          // Muestra un mensaje de error si el registro falla
           this.errorMessage = response.message || 'Error en el registro. Contacta con un administrador.';
         }
-        this.loading = false; // Desactiva el estado de "cargando"
       },
       error: (error) => {
-        // Muestra un mensaje de error si hay un problema de conexión
+        this.loading = false;
         this.errorMessage = error.error?.message || 'Error de conexión con el servidor. Inténtalo más tarde o contacta con un administrador.';
-        this.loading = false; // Desactiva el estado de "cargando"
       },
     });
   }
