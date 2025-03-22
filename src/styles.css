@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden auto; /* Oculta el scroll horizontal, mantiene el vertical */
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background: #0f172a center/cover fixed;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px; /* Espacio para el header fijo */
+}

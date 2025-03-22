@@ -1,0 +1,395 @@
+  /* 
+   |----------------------------------------|
+   |              BIENVENIDA                |
+   |----------------------------------------|
+   */
+
+.hero {
+  height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%), 
+    url('../../../assets/images/homepage_wallpaper.jpg') no-repeat center/cover;
+}
+
+.hero-content {
+  text-align: center;
+  animation: fadeIn 1s ease-out;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(45deg, #fff, #e2e8f0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: #d1d5db;
+  margin-bottom: 2.5rem;
+}
+
+  /* 
+   |----------------------------------------|
+   |              BOTONERA                  |
+   |----------------------------------------|
+   */
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-button {
+  padding: 0.85rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+}
+
+.cta-button.secondary {
+  background: transparent;
+  border: 2px solid #6a11cb;
+  color: #6a11cb;
+}
+
+  /* 
+   |----------------------------------------|
+   |            ABOUT SECTION               |
+   |----------------------------------------|
+   */
+
+.about {
+  padding: 6rem 5%;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.highlight {
+  font-size: 2rem;
+  line-height: 1.3;
+  margin-bottom: 2rem;
+  color: #6a11cb;
+}
+
+.about-list {
+  list-style: none;
+  padding: 0;
+}
+
+.about-list li {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(106, 17, 203, 0.05);
+  border-radius: 0.5rem;
+}
+
+.image-frame {
+  height: 500px;
+  border-radius: 1rem;
+  background: url(' ../../../assets/images/supermercado.jpg') center/cover;
+}
+
+  /* 
+   |----------------------------------------|
+   |          FEATURES SECTION              |
+   |----------------------------------------|
+   */
+
+.features {
+    padding: 8rem 5%;
+    background: #0f172a;
+    position: relative;
+    overflow: hidden;
+}
+
+.features-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    position: relative;
+    min-height: 500px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: linear-gradient(15deg, #1e293b, #0f172a);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px) rotateX(2deg) rotateY(2deg);
+    box-shadow: 0 35px 60px -15px rgba(106,17,203,0.3);
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, rgba(106,17,203,0.1) 0%, rgba(15,23,42,0.8) 100%);
+    z-index: 1;
+}
+
+.card-content {
+    position: relative;
+    padding: 2.5rem;
+    color: #fff;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.icon-wrapper {
+    width: 100px;
+    height: 100px;
+    background: rgba(106,17,203,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.icon-wrapper i {
+    font-size: 2.5rem;
+    color: #6a11cb;
+}
+
+.feature-card h3 {
+    font-size: 2rem;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+}
+
+.card-excerpt {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.card-details {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.card-details li {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.price-comparison {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.our-price, .market-price {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    min-width: 120px;
+}
+
+.our-price {
+    background: rgba(106,17,203,0.2);
+}
+
+.market-price {
+    background: rgba(255,107,107,0.1);
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+}
+
+.categories-grid span {
+    padding: 0.8rem;
+    background: rgba(106,17,203,0.1);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.section-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    text-align: center;
+    margin: 0 auto 4rem;
+    position: relative;
+    font-weight: 700;
+    line-height: 1.1;
+    background: linear-gradient(45deg, #6a11cb, #2575fc, #37ecba);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    padding: 0 1.5rem;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+}
+  
+  /* Título específico para Features */
+.features .section-title:first-of-type {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 5rem;
+    padding: 0 2.5rem 1.5rem;
+    position: relative;
+}
+  
+.features .section-title:first-of-type::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 50%, #37ecba 100%);
+    border-radius: 2px;
+    animation: underlinePulse 3s ease-in-out infinite;
+} 
+  
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 50%, #37ecba 100%);
+    border-radius: 2px;
+    animation: underlinePulse 3s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(106,17,203,0.3);
+}
+  
+.section-title::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4.5em;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    z-index: -1;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.feature-card:nth-child(odd) {
+  animation: float 6s ease-in-out infinite;
+}
+
+.feature-card:nth-child(even) {
+  animation: float 6s ease-in-out infinite 3s;
+}
+
+  /* 
+   |----------------------------------------|
+   |            RESPONSIVIDAD               |
+   |----------------------------------------|
+   */
+
+@media (max-width: 768px) {
+    .nav-links {
+      margin-left: 0;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.98);
+    }
+  
+    .features-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .feature-card {
+      min-height: auto;
+      padding: 2rem;
+    }
+  
+}
+  
+@media (max-width: 480px) {
+    .hero h1 {
+      font-size: 2rem;
+    }
+  
+    .feature-item {
+      height: 300px;
+    }
+  
+    .cta-button {
+      width: 100%;
+    }
+}
+  
+  /* 
+  |----------------------------------------|
+  |          ANIMACIONES                   |
+  |----------------------------------------|
+  */
+
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}

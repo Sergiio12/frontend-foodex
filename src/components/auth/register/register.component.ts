@@ -22,6 +22,7 @@ export class RegisterComponent {
   loading = false;
   showPassword = false;
   showConfirmPassword = false;
+  fieldErrors: { [key: string]: string } = {}; // Almacena errores específicos por campo
 
   faSpinner = faSpinner;
   faEye = faEye;
@@ -43,23 +44,29 @@ export class RegisterComponent {
     );
   }
 
+  // Getters para acceder a los controles del formulario
   get username() { return this.registerForm.get('username')!; }
   get email() { return this.registerForm.get('email')!; }
   get password() { return this.registerForm.get('password')!; }
   get confirmPassword() { return this.registerForm.get('confirmPassword')!; }
 
+  // Alternar visibilidad de la contraseña
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
+  // Alternar visibilidad de la confirmación de contraseña
   toggleConfirmPassword(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  closeErrorMessage() {
+  // Cerrar el mensaje de error
+  closeErrorMessage(): void {
     this.errorMessage = '';
+    this.fieldErrors = {}; // Limpiar errores específicos al cerrar el mensaje
   }
 
+  // Validador personalizado para confirmar que las contraseñas coincidan
   mustMatch(controlName: string, matchingControlName: string) {
     return (formGroup: AbstractControl) => {
       const control = formGroup.get(controlName);
@@ -75,12 +82,42 @@ export class RegisterComponent {
     };
   }
 
+  hasError(field: string): boolean {
+  return !!this.fieldErrors[field] || (this.submitted && (this.registerForm.get(field)?.invalid ?? false));
+}
+
+  // Obtener el mensaje de error para un campo específico
+  getErrorMessage(field: string): string {
+    if (this.fieldErrors[field]) {
+      return this.fieldErrors[field]; // Devuelve el mensaje de error específico del campo
+    }
+
+    const control = this.registerForm.get(field);
+    if (control?.errors?.['required']) {
+      return 'Este campo es obligatorio.';
+    } else if (control?.errors?.['email']) {
+      return 'Debe ingresar un correo electrónico válido.';
+    } else if (control?.errors?.['minlength']) {
+      return `Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
+    } else if (control?.errors?.['mustMatch']) {
+      return 'Las contraseñas no coinciden.';
+    }
+
+    return '';
+  }
+
+  // Método que se ejecuta al enviar el formulario
   onSubmit(): void {
     this.submitted = true;
-    if (this.registerForm.invalid) return;
+
+    // Verificar si el formulario es inválido
+    if (this.registerForm.invalid) {
+      return;
+    }
 
     this.loading = true;
     this.errorMessage = null;
+    this.fieldErrors = {}; // Limpiar errores anteriores
 
     const registerData: SignupRequest = {
       username: this.registerForm.value.username,
@@ -91,14 +128,26 @@ export class RegisterComponent {
     this.authService.register(registerData).subscribe({
       next: (response) => {
         this.loading = false;
+
+        // Si el registro es exitoso, redirige al usuario
         if (response.status === 'success') {
           this.router.navigate(['/login']);
         } else {
+          // Si hay un mensaje de error general, lo mostramos
           this.errorMessage = response.message || 'Error en el registro. Contacta con un administrador.';
         }
       },
       error: (error) => {
         this.loading = false;
+
+        // Si hay errores de validación específicos, los procesamos
+        if (error.error?.errors) {
+          error.error.errors.forEach((err: { field: string; message: string }) => {
+            this.fieldErrors[err.field] = err.message; // Almacena el error por campo
+          });
+        }
+
+        // Si hay un mensaje de error general, lo mostramos
         this.errorMessage = error.error?.message || 'Error de conexión con el servidor. Inténtalo más tarde o contacta con un administrador.';
       },
     });

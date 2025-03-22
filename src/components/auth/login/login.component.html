@@ -1,72 +1,91 @@
+<app-header></app-header>
+
 <div class="login-container">
   <div class="login-card">
-    <h2 class="login-title">Iniciar Sesión</h2>
-
-    <!-- Mensaje de error con la opción de cerrar -->
-    <div *ngIf="errorMessage" class="error-message">
-      <button class="close-btn" (click)="closeErrorMessage()">×</button>
-      {{ errorMessage }}
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <svg class="logo-icon" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12,3A4,4 0 0,0 8,7V13H6V15H9V21H11V15H13V21H15V15H18V13H16V7A4,4 0 0,0 12,3Z" />
+        </svg>
+      </div>
+      <h1 class="title">Bienvenido a <span class="brand">SuperMarket</span></h1>
+      <p class="subtitle">Tu tienda online favorita</p>
     </div>
 
-    <!-- Formulario de login -->
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-      
-      <!-- Campo de usuario -->
-      <div class="form-group">
-        <label for="username" class="form-label">Nombre de Usuario</label>
-        <input
-          type="text"
-          id="username"
-          formControlName="username"
-          class="form-input"
-          placeholder="Ingrese su usuario"
-          [ngClass]="{ 'input-error': username.invalid && (username.touched || submitted) }"
-        />
-        <div *ngIf="username.invalid && (username.touched || submitted)" class="error-text">
-          <div *ngIf="username.errors?.['required']">El nombre de usuario es requerido.</div>
-          <div *ngIf="username.errors?.['minlength']">Debe tener al menos 4 caracteres.</div>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
+      <!-- Usuario -->
+      <div class="input-group">
+        <div class="floating-label">
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder=" "
+            [class.invalid]="username.invalid && username.touched"
+          >
+          <label for="username">Nombre de usuario</label>
+          <div class="input-decoration"></div>
+        </div>
+        <div *ngIf="username.invalid && username.touched" class="error-text">
+          <span *ngIf="username.errors?.['required']">⚠ Campo obligatorio</span>
+          <span *ngIf="username.errors?.['minlength']">⚠ Mínimo 4 caracteres</span>
         </div>
       </div>
 
-      <!-- Campo de contraseña -->
-      <div class="form-group">
-        <label for="password" class="form-label">Contraseña</label>
-        <div class="password-input">
+      <!-- Contraseña -->
+      <div class="input-group">
+        <div class="floating-label">
           <input
-            [type]="showPassword ? 'text' : 'password'"
             id="password"
+            [type]="showPassword ? 'text' : 'password'"
             formControlName="password"
-            class="form-input"
-            placeholder="Ingrese su contraseña"
-            [ngClass]="{ 'input-error': password.invalid && (password.touched || submitted) }"
-          />
-          <button
-            type="button"
+            placeholder=" "
+            [class.invalid]="password.invalid && password.touched"
+          >
+          <label for="password">Contraseña</label>
+          <div class="input-decoration"></div>
+          <button 
+            type="button" 
             class="toggle-password"
             (click)="togglePassword()"
-            [title]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
           >
-            <fa-icon [icon]="showPassword ? faEyeSlash : faEye" [style.color]="'#6a11cb'"></fa-icon>
+            <fa-icon [icon]="showPassword ? faEyeSlash : faEye"></fa-icon>
           </button>
         </div>
-        <div *ngIf="password.invalid && (password.touched || submitted)" class="error-text">
-          <div *ngIf="password.errors?.['required']">La contraseña es requerida.</div>
-          <div *ngIf="password.errors?.['minlength']">Debe tener al menos 8 caracteres.</div>
+        <div *ngIf="password.invalid && password.touched" class="error-text">
+          <span *ngIf="password.errors?.['required']">⚠ Campo obligatorio</span>
+          <span *ngIf="password.errors?.['minlength']">⚠ Mínimo 8 caracteres</span>
+          <span *ngIf="password.errors?.['passwordStrength']">⚠ Mayúsculas, minúsculas y números</span>
         </div>
       </div>
 
-      <!-- Botón de envío -->
-      <button type="submit" class="login-button" [disabled]="loading">
-        <span *ngIf="!loading">Ingresar</span>
-        <span *ngIf="loading">
-          <fa-icon [icon]="faSpinner" [ngClass]="{'fa-spin': loading}"></fa-icon> Procesando...
+      <!-- Botón -->
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="loading"
+        [class.loading]="loading"
+      >
+        <span class="btn-content">
+          <span class="btn-text" [class.hidden]="loading">Ingresar</span>
+          <fa-icon 
+            *ngIf="loading" 
+            [icon]="faSpinner" 
+            class="spinner"
+          ></fa-icon>
         </span>
+        <div class="btn-gradient"></div>
       </button>
-    </form>
 
-    <!-- Enlace de registro -->
-    <div class="register-link">
-      ¿No tienes cuenta? <a routerLink="/signup">Regístrate</a>
-    </div>
+      <div class="links">
+        <a routerLink="/registro" class="register-link">
+          ¿Primera vez aquí? 
+          <span class="link-highlight">Crea una cuenta</span>
+        </a>
+      </div>
+    </form>
   </div>
 </div>
+
+<app-footer></app-footer>

@@ -1,11 +1,11 @@
 /* Fondo de la página */
-html, body {
+html {
   height: 100%;
   font-family: 'Poppins', sans-serif; /* Tipografía moderna */
 }
 
 body {
-  background-image: url('../../../assets/images/background.jpg'); /* Imagen de fondo */
+  /*background-image: url('../../../assets/images/background.jpg'); Imagen de fondo */
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -44,7 +44,7 @@ body {
 .logo {
   width: 100px; /* Tamaño aumentado */
   height: 100px; /* Tamaño aumentado */
-  background-image: url('../../../assets/images/logo.png'); /* Ruta del logo */
+  /*background-image: url('../../../assets/images/logo.png'); Ruta del logo */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
