@@ -1,19 +1,24 @@
 <app-header></app-header>
 
+<!-- Notificación flotante -->
+<div class="global-notification"
+     *ngIf="notification"
+     [class.success]="notification.type === 'success'"
+     [class.error]="notification.type === 'error'">
+  <span class="notification-icon">{{ notification.type === 'success' ? '✓' : '⚠' }}</span>
+  <span class="notification-message">{{ notification.message }}</span>
+  <button class="close-notification" (click)="clearNotification()" aria-label="Cerrar notificación">&times;</button>
+</div>
+
 <div class="login-container">
   <div class="login-card">
     <div class="login-header">
-      <div class="logo-wrapper">
-        <svg class="logo-icon" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M12,3A4,4 0 0,0 8,7V13H6V15H9V21H11V15H13V21H15V15H18V13H16V7A4,4 0 0,0 12,3Z" />
-        </svg>
-      </div>
       <h1 class="title">Bienvenido a <span class="brand">SuperMarket</span></h1>
       <p class="subtitle">Tu tienda online favorita</p>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
-      <!-- Usuario -->
+      <!-- Campo de usuario -->
       <div class="input-group">
         <div class="floating-label">
           <input
@@ -26,13 +31,14 @@
           <label for="username">Nombre de usuario</label>
           <div class="input-decoration"></div>
         </div>
-        <div *ngIf="username.invalid && username.touched" class="error-text">
-          <span *ngIf="username.errors?.['required']">⚠ Campo obligatorio</span>
-          <span *ngIf="username.errors?.['minlength']">⚠ Mínimo 4 caracteres</span>
+        <div *ngIf="username.invalid && username.touched" class="error-list">
+          <div *ngIf="username.errors?.['required']" class="error-item">
+            <p>Campo obligatorio</p>
+          </div>
         </div>
       </div>
 
-      <!-- Contraseña -->
+      <!-- Campo de contraseña -->
       <div class="input-group">
         <div class="floating-label">
           <input
@@ -53,14 +59,17 @@
             <fa-icon [icon]="showPassword ? faEyeSlash : faEye"></fa-icon>
           </button>
         </div>
-        <div *ngIf="password.invalid && password.touched" class="error-text">
-          <span *ngIf="password.errors?.['required']">⚠ Campo obligatorio</span>
-          <span *ngIf="password.errors?.['minlength']">⚠ Mínimo 8 caracteres</span>
-          <span *ngIf="password.errors?.['passwordStrength']">⚠ Mayúsculas, minúsculas y números</span>
+        <div *ngIf="password.invalid && password.touched" class="error-list">
+          <div *ngIf="password.errors?.['required']" class="error-item">
+            <p>Campo obligatorio</p>
+          </div>
+          <div *ngIf="password.errors?.['minlength']" class="error-item">
+            <p>Mínimo 8 caracteres</p>
+          </div>
         </div>
       </div>
 
-      <!-- Botón -->
+      <!-- Botón de submit -->
       <button 
         type="submit" 
         class="submit-btn"
@@ -75,9 +84,9 @@
             class="spinner"
           ></fa-icon>
         </span>
-        <div class="btn-gradient"></div>
       </button>
 
+      <!-- Enlace de registro -->
       <div class="links">
         <a routerLink="/registro" class="register-link">
           ¿Primera vez aquí? 

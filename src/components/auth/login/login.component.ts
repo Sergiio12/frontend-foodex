@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { HeaderComponent } from '../../header/header.component';
 import { FooterComponent } from '../../footer/footer.component';
-import { AlertController } from '@ionic/angular';
 import { catchError, finalize, throwError, lastValueFrom } from 'rxjs';
 
 @Component({
@@ -24,11 +23,12 @@ import { catchError, finalize, throwError, lastValueFrom } from 'rxjs';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   loginForm: FormGroup;
   loading = false;
   showPassword = false;
-  errorMessage: string | null = null;
+  notification: { type: 'success' | 'error', message: string } | null = null;
+  private notificationTimeout: any;
 
   // Iconos
   faSpinner = faSpinner;
@@ -38,29 +38,14 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private alertController: AlertController
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(4)]],
       password: ['', [
         Validators.required,
-        Validators.minLength(8),
-        this.passwordStrengthValidator
       ]],
     });
-  }
-
-  // Validación personalizada de contraseña
-  private passwordStrengthValidator(control: AbstractControl) {
-    const value = control.value;
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    
-    return !(hasUpperCase && hasLowerCase && hasNumber) 
-      ? { passwordStrength: true } 
-      : null;
   }
 
   // Getters para acceder fácilmente a los controles
@@ -71,39 +56,20 @@ export class LoginComponent {
   get password() {
     return this.loginForm.get('password')!;
   }
-
+  
   togglePassword(): void {
     this.showPassword = !this.showPassword;
-  }
-
-  // Método para mostrar los mensajes de error en tiempo real
-  get usernameErrorMessage(): string {
-    if (this.username.hasError('required')) {
-      return 'El nombre de usuario es requerido';
-    } else if (this.username.hasError('minlength')) {
-      return 'El nombre de usuario debe tener al menos 4 caracteres';
-    }
-    return '';
-  }
-
-  get passwordErrorMessage(): string {
-    if (this.password.hasError('required')) {
-      return 'La contraseña es requerida';
-    } else if (this.password.hasError('minlength')) {
-      return 'La contraseña debe tener al menos 8 caracteres';
-    } else if (this.password.hasError('passwordStrength')) {
-      return 'La contraseña debe contener mayúsculas, minúsculas y números';
-    }
-    return '';
   }
 
   async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.markAllAsTouched();
+      this.showNotification('error', 'Por favor completa todos los campos requeridos');
       return;
     }
 
     this.loading = true;
+    this.clearNotification();
 
     try {
       const response = await lastValueFrom(
@@ -116,11 +82,14 @@ export class LoginComponent {
         )
       );
 
-      await this.showAlert('success', '¡Autenticación exitosa!');
-      this.router.navigate(['/dashboard']);
+      this.showNotification('success', '¡Bienvenido! Redirigiendo...');
+      setTimeout(() => this.router.navigate(['/dashboard']), 1500);
       
-    } catch (error) {
-      await this.showAlert('error', this.errorMessage || 'Error desconocido');
+    } catch (error: any) {
+      const errorMessage = error.error?.message || 
+                          error.message || 
+                          'Error desconocido. Por favor intenta nuevamente.';
+      this.showNotification('error', errorMessage);
     }
   }
 
@@ -130,21 +99,40 @@ export class LoginComponent {
     });
   }
 
-  private async showAlert(type: 'success' | 'error', message: string): Promise<void> {
-    const alert = await this.alertController.create({
-      header: type === 'success' ? '¡Éxito!' : 'Error',
-      message,
-      buttons: ['OK'],
-      cssClass: `custom-alert ${type}-alert`,
-      translucent: true,
-    });
-    
-    await alert.present();
+  private showNotification(type: 'success' | 'error', message: string): void {
+    this.clearNotification();
+    this.notification = { type, message };
+    this.notificationTimeout = setTimeout(() => {
+      this.notification = null;
+    }, 4000);
+  }
+
+  clearNotification(): void {
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+      this.notificationTimeout = null;
+    }
+    this.notification = null;
   }
 
   private handleAuthenticationError(error: any): void {
-    const errorMessage = typeof error === 'object' ? error.message : error;
-    this.errorMessage = errorMessage || 'Error de conexión. Verifica tu internet e intenta nuevamente.';
-    throw error;
+    let errorMessage = 'Error de autenticación';
+    
+    if (error.status === 401) {
+      errorMessage = 'Usuario o contraseña incorrectos';
+    } else if (error.status === 0) {
+      errorMessage = 'Error de conexión. Verifica tu internet';
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
+    }
+
+    throw throwError(() => ({
+      message: errorMessage,
+      error: error
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this.clearNotification();
   }
 }
