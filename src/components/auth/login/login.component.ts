@@ -7,7 +7,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { HeaderComponent } from '../../header/header.component';
 import { FooterComponent } from '../../footer/footer.component';
-import { catchError, finalize, throwError, lastValueFrom } from 'rxjs';
+import { catchError, finalize, lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -27,8 +27,8 @@ export class LoginComponent implements OnDestroy {
   loginForm: FormGroup;
   loading = false;
   showPassword = false;
-  notification: { type: 'success' | 'error', message: string } | null = null;
-  private notificationTimeout: any;
+  notification: { type: 'success' | 'error'; message: string } | null = null;
+  private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // Iconos
   faSpinner = faSpinner;
@@ -42,13 +42,10 @@ export class LoginComponent implements OnDestroy {
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(4)]],
-      password: ['', [
-        Validators.required,
-      ]],
+      password: ['', [Validators.required]],
     });
   }
 
-  // Getters para acceder fácilmente a los controles
   get username() {
     return this.loginForm.get('username')!;
   }
@@ -56,7 +53,7 @@ export class LoginComponent implements OnDestroy {
   get password() {
     return this.loginForm.get('password')!;
   }
-  
+
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
@@ -64,7 +61,6 @@ export class LoginComponent implements OnDestroy {
   async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.markAllAsTouched();
-      this.showNotification('error', 'Por favor completa todos los campos requeridos');
       return;
     }
 
@@ -73,23 +69,17 @@ export class LoginComponent implements OnDestroy {
 
     try {
       const response = await lastValueFrom(
-        this.authService.authenticate(this.loginForm.value).pipe(
-          catchError(error => {
-            this.handleAuthenticationError(error);
-            return throwError(() => error);
-          }),
-          finalize(() => this.loading = false)
-        )
+        this.authService.authenticate(this.loginForm.value)
       );
 
+      localStorage.setItem('access_token', response.accessToken);
       this.showNotification('success', '¡Bienvenido! Redirigiendo...');
-      setTimeout(() => this.router.navigate(['/dashboard']), 1500);
-      
+      await this.delay(1500);
+      this.router.navigate(['/dashboard']);
     } catch (error: any) {
-      const errorMessage = error.error?.message || 
-                          error.message || 
-                          'Error desconocido. Por favor intenta nuevamente.';
-      this.showNotification('error', errorMessage);
+      this.showNotification('error', error.message || 'Error inesperado. Por favor intenta nuevamente.');
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -115,21 +105,8 @@ export class LoginComponent implements OnDestroy {
     this.notification = null;
   }
 
-  private handleAuthenticationError(error: any): void {
-    let errorMessage = 'Error de autenticación';
-    
-    if (error.status === 401) {
-      errorMessage = 'Usuario o contraseña incorrectos';
-    } else if (error.status === 0) {
-      errorMessage = 'Error de conexión. Verifica tu internet';
-    } else if (error.error?.message) {
-      errorMessage = error.error.message;
-    }
-
-    throw throwError(() => ({
-      message: errorMessage,
-      error: error
-    }));
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   ngOnDestroy(): void {

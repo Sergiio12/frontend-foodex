@@ -25,8 +25,10 @@ export class AuthService {
     );
   }
 
-  register(user: SignupRequest) : Observable<any> {
-    return this.http.post(`${this.apiUrl}/signup`, user)
+  register(user: SignupRequest): Observable<any> {
+    return this.http.post(`${this.apiUrl}/signup`, user).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   private hasToken(): boolean {
@@ -40,21 +42,28 @@ export class AuthService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Error desconocido';
-    
-    if (error.error?.message) {
-      errorMessage = error.error.message;
-    } else if (error.status === 401) {
-      errorMessage = 'Credenciales inválidas';
-    } else if (error.status === 0) {
-      errorMessage = 'Error de conexión con el servidor';
-    }
+  let errorMessage = 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
+  const errorData = error.error?.message ? error.error.message.toLowerCase() : '';
 
-    return throwError(() => ({ 
-      message: errorMessage,
-      code: error.status
-    }));
+  if (error.status === 0) {
+    errorMessage = 'No se ha obtenido respuesta del servidor. Revise su conexión a internet y, si el error persiste, póngase en contacto con el administrador del sitio web.';
+  } else if (error.status === 401) {
+    errorMessage = 'Credenciales inválidas.';
+  } else if (error.status === 403) {
+    errorMessage = 'Cuenta desactivada o sin permisos. Contacta al administrador.';
+  } else if (error.status === 429) {
+    errorMessage = 'Demasiados intentos fallidos. Intenta nuevamente en 15 minutos.';
+  } else if (error.status >= 500) {
+    errorMessage = 'Error interno del servidor. Nuestro equipo ya está trabajando en solucionarlo.';
   }
+
+  return throwError(() => ({
+    message: errorMessage,
+    code: error.status,
+    originalError: error.error
+  }));
+}
+
 
   logout(): void {
     localStorage.removeItem('access_token');

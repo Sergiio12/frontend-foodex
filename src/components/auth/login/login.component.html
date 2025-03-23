@@ -1,23 +1,49 @@
 <app-header></app-header>
 
 <!-- Notificación flotante -->
-<div class="global-notification"
-     *ngIf="notification"
-     [class.success]="notification.type === 'success'"
-     [class.error]="notification.type === 'error'">
-  <span class="notification-icon">{{ notification.type === 'success' ? '✓' : '⚠' }}</span>
+<div 
+  class="global-notification" 
+  *ngIf="notification" 
+  [ngClass]="{
+    'success': notification.type === 'success',
+    'error': notification.type === 'error',
+    'show': notification
+  }" 
+  role="alert" 
+  aria-live="assertive"
+>
+  <span class="notification-icon" aria-hidden="true">
+    {{ notification.type === 'success' ? '✓' : '⚠' }}
+  </span>
   <span class="notification-message">{{ notification.message }}</span>
-  <button class="close-notification" (click)="clearNotification()" aria-label="Cerrar notificación">&times;</button>
+  <button 
+    class="close-notification" 
+    (click)="clearNotification()" 
+    aria-label="Cerrar notificación"
+  >
+    &times;
+  </button>
 </div>
 
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <h1 class="title">Bienvenido a <span class="brand">SuperMarket</span></h1>
+<main class="login-container">
+  <section class="login-card" aria-labelledby="login-title">
+    <header class="login-header">
+      <h1 id="login-title" class="title">
+        Bienvenido a <span class="brand">SuperMarket</span>
+      </h1>
       <p class="subtitle">Tu tienda online favorita</p>
-    </div>
+    </header>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
+    <form 
+      [formGroup]="loginForm" 
+      (ngSubmit)="onSubmit()" 
+      class="form" 
+      aria-describedby="form-instructions"
+    >
+      <p id="form-instructions" class="sr-only">
+        Por favor, completa los campos requeridos para iniciar sesión.
+      </p>
+
       <!-- Campo de usuario -->
       <div class="input-group">
         <div class="floating-label">
@@ -27,13 +53,18 @@
             formControlName="username"
             placeholder=" "
             [class.invalid]="username.invalid && username.touched"
+            aria-required="true"
+            [attr.aria-invalid]="username.invalid && username.touched"
           >
           <label for="username">Nombre de usuario</label>
           <div class="input-decoration"></div>
         </div>
         <div *ngIf="username.invalid && username.touched" class="error-list">
           <div *ngIf="username.errors?.['required']" class="error-item">
-            <p>Campo obligatorio</p>
+            <p>Este campo es obligatorio</p>
+          </div>
+          <div *ngIf="username.errors?.['minlength']" class="error-item">
+            <p>El nombre de usuario debe tener al menos 4 caracteres</p>
           </div>
         </div>
       </div>
@@ -47,6 +78,8 @@
             formControlName="password"
             placeholder=" "
             [class.invalid]="password.invalid && password.touched"
+            aria-required="true"
+            [attr.aria-invalid]="password.invalid && password.touched"
           >
           <label for="password">Contraseña</label>
           <div class="input-decoration"></div>
@@ -61,10 +94,7 @@
         </div>
         <div *ngIf="password.invalid && password.touched" class="error-list">
           <div *ngIf="password.errors?.['required']" class="error-item">
-            <p>Campo obligatorio</p>
-          </div>
-          <div *ngIf="password.errors?.['minlength']" class="error-item">
-            <p>Mínimo 8 caracteres</p>
+            <p>Este campo es obligatorio</p>
           </div>
         </div>
       </div>
@@ -78,23 +108,22 @@
       >
         <span class="btn-content">
           <span class="btn-text" [class.hidden]="loading">Ingresar</span>
-          <fa-icon 
-            *ngIf="loading" 
-            [icon]="faSpinner" 
-            class="spinner"
-          ></fa-icon>
+          <div *ngIf="loading" class="custom-spinner" aria-hidden="true">
+            <div class="spinner-circle"></div>
+            <div class="spinner-circle"></div>
+          </div>
         </span>
       </button>
 
       <!-- Enlace de registro -->
       <div class="links">
-        <a routerLink="/registro" class="register-link">
+        <a routerLink="/signup" class="register-link">
           ¿Primera vez aquí? 
           <span class="link-highlight">Crea una cuenta</span>
         </a>
       </div>
     </form>
-  </div>
-</div>
+  </section>
+</main>
 
 <app-footer></app-footer>
