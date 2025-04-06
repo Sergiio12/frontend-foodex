@@ -1,10 +1,66 @@
-<header class="header" role="banner">
-    <nav aria-label="Navegación principal">
-      <!-- Añade esto dentro del header -->
-      <ul class="nav-links">
-        <li><a href="/home">Nosotros</a></li>
-        <li><a href="/login">Entrar</a></li>
-      </ul>
-    </nav>
-  </header>
-  
+<header class="navbar" role="banner">
+  <nav class="nav-container" aria-label="Navegación principal">
+    <!-- Sección izquierda -->
+    <div class="nav-left">
+      <a routerLink="/home" class="nav-brand hover-underline" aria-label="Página de inicio">Nosotros</a>
+      <a routerLink="/productos" class="nav-link hover-underline" aria-label="Ver catálogo">Catálogo</a>
+    </div>
+
+    <!-- Sección derecha -->
+    <div class="nav-right">
+      <!-- Carrito -->
+      <ng-container *ngIf="isLoggedIn">
+        <div class="cart-container" (click)="openCart()" role="button" aria-label="Carrito de compras">
+          <img src="https://cdn-icons-png.flaticon.com/512/107/107831.png" 
+               class="cart-image" 
+               alt="Ícono del carrito"
+               aria-hidden="true">
+          <div class="cart-badge" *ngIf="cartItems > 0" aria-label="Cantidad de items en el carrito">
+            {{ cartItems }}
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Menú usuario -->
+      <ng-container *ngIf="isLoggedIn; else loginTemplate">
+        <div class="user-container" 
+             (click)="toggleUserMenu()" 
+             role="button"
+             aria-haspopup="menu"
+             [attr.aria-expanded]="isUserMenuOpen">
+          <div class="user-avatar" aria-hidden="true">
+            {{ username | slice:0:1 | uppercase }}
+          </div>
+          <div class="user-name" aria-label="Nombre de usuario">{{ username }}</div>
+          <svg class="menu-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke="currentColor" stroke-width="2" d="M5 9l7 7 7-7"/>
+          </svg>
+          
+          <!-- Menú desplegable -->
+          <div class="user-menu" 
+               [class.active]="isUserMenuOpen"
+               role="menu"
+               *ngIf="isUserMenuOpen">
+            <div class="menu-item" role="menuitem" routerLink="/profile">
+              <i class="icon-user" aria-hidden="true"></i>Perfil
+            </div>
+            <div class="menu-item" role="menuitem" routerLink="/settings">
+              <i class="icon-settings" aria-hidden="true"></i>Configuración
+            </div>
+            <div class="menu-divider" aria-hidden="true"></div>
+            <div class="menu-item" role="menuitem" (click)="logout()">
+              <i class="icon-logout" aria-hidden="true"></i>Cerrar sesión
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #loginTemplate>
+        <a routerLink="/login" class="login-btn" aria-label="Iniciar sesión">
+          <span>Entrar</span>
+          <div class="btn-glow" aria-hidden="true"></div>
+        </a>
+      </ng-template>
+    </div>
+  </nav>
+</header>

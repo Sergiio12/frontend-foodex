@@ -7,7 +7,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { HeaderComponent } from '../../header/header.component';
 import { FooterComponent } from '../../footer/footer.component';
-import { catchError, finalize, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +34,9 @@ export class LoginComponent implements OnDestroy {
   faSpinner = faSpinner;
   faEye = faEye;
   faEyeSlash = faEyeSlash;
+
+  // Llave para almacenar el token
+  private readonly TOKEN_KEY = 'authToken';
 
   constructor(
     private fb: FormBuilder,
@@ -71,13 +74,18 @@ export class LoginComponent implements OnDestroy {
       const response = await lastValueFrom(
         this.authService.authenticate(this.loginForm.value)
       );
-
-      localStorage.setItem('access_token', response.accessToken);
-      this.showNotification('success', '¡Bienvenido! Redirigiendo...');
+      
+      // Guarda el token usando la llave definida
+      localStorage.setItem(this.TOKEN_KEY, response.data.token);
+      
+      this.showNotification('success', 'Inicio de sesión exitoso. Redirigiendo...');
       await this.delay(1500);
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/home']);
     } catch (error: any) {
-      this.showNotification('error', error.message || 'Error inesperado. Por favor intenta nuevamente.');
+      this.showNotification(
+        'error',
+        error.message || 'Error inesperado. Por favor intenta nuevamente.'
+      );
     } finally {
       this.loading = false;
     }
