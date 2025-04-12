@@ -30,98 +30,100 @@ export class AuthService {
     this.validateExistingToken();
   }
 
-  // En tu AuthService
+  // Login del usuario
   authenticate(user: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/signin`, user).pipe(
       tap(response => {
         if (response?.data?.token) {
           this.storeToken(response.data.token);
           this.authStatus.next(true);
-          // ¡Faltaba actualizar el estado de autenticación aquí!
-          this.validateExistingToken(); // Añadir esta línea
+          this.validateExistingToken(); // Validar token al iniciar sesión
         }
       }),
-      catchError(error => this.handleError(error)) // Añadir manejo de errores
+      catchError(error => this.handleError(error)) // Manejo de errores
     );
   }
 
+  // Registro de usuario
   register(user: SignupRequest): Observable<any> {
     return this.http.post(`${this.API_URL}/signup`, user).pipe(
       catchError(error => this.handleError(error))
     );
   }
 
+  // Logout del usuario
   logout(): void {
     this.clearToken();
     this.authStatus.next(false);
     this.router.navigate(['/login']);
   }
 
+  // Obtener estado de autenticación
   getAuthStatus(): Observable<boolean> {
     return this.authStatus.asObservable();
   }
 
+  // Obtener el token
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  // Extrae información del token decodificándolo
-  // En AuthService
+  // Extraer nombre de usuario del token
   getUsername(): string | null {
     const token = this.getToken();
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload?.preferred_username || 
-            payload?.unique_name || 
-            payload?.username || 
-            payload?.sub || 
-            null;
+      return payload?.preferred_username || payload?.unique_name || payload?.username || payload?.sub || null;
     } catch (e) {
       console.error('Error decodificando token:', e);
       return null;
     }
   }
 
-  // MEJORAR MÉTODO isValidToken
+  // Verificar si el token es válido
   isValidToken(token: string | null): boolean {
     if (!token) return false;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const now = Math.floor(Date.now() / 1000);
-      return payload.exp > now; // Verificar expiración real del token
+      return payload.exp > now; // Verificar expiración del token
     } catch (e) {
       return false;
     }
   }
 
-  // Añade este método en la clase AuthService
+  // Verificar si el usuario tiene un rol específico
   hasRole(requiredRole: string): boolean {
     const userRoles = this.getUserRoles();
     return userRoles.includes(requiredRole);
   }
 
+  // Obtener los roles del usuario
   private getUserRoles(): string[] {
     const token = this.getToken();
     if (!token) return [];
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.roles || [];
+      const roles = payload.roles || [];
+      return Array.isArray(roles) ? roles : [roles]; // Asegurarse de que los roles sean un array
     } catch (e) {
       console.error('Error decodificando roles del token:', e);
       return [];
     }
   }
-  // Solo almacena el token en el localStorage
+
+  // Almacenar el token
   private storeToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
+  // Limpiar el token
   private clearToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
-  // MEJORAR validateExistingToken
+  // Validar token existente
   private validateExistingToken(): void {
     const token = this.getToken();
     const isValid = this.isValidToken(token);
@@ -134,7 +136,7 @@ export class AuthService {
     }
   }
 
-  // ACTUALIZAR handleError
+  // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Error desconocido';
     if (error.error instanceof ErrorEvent) {
@@ -150,6 +152,7 @@ export class AuthService {
     }));
   }
 
+  // Obtener mensaje de error específico
   private getErrorMessage(error: HttpErrorResponse): string {
     switch (error.status) {
       case 0:
