@@ -11,27 +11,29 @@ import { ApiResponseBody } from '../model/ApiResponseBody';
 })
 export class CategoriasService {
   private apiUrl = 'http://localhost:8080/api/categorias';
-  private imagenBaseUrl = 'http://localhost:8080/';
+  private imagenBaseUrl = 'http://localhost:8080/api/images';
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) {}
 
+  // Método para actualizar una categoría
   updateCategoria(categoria: Categoria): Observable<Categoria> {
-    return this.http.put<Categoria>(
+    return this.http.put<ApiResponseBody<Categoria>>(
       `${this.apiUrl}/${categoria.id}`,
       {
         nombre: categoria.nombre,
-        descripcion: categoria.descripcion,
-        imgUrl: categoria.imgUrl  // Aquí usamos el nombre original del backend
+        descripcion: categoria.descripcion
       },
       { headers: this.createHeaders() }
     ).pipe(
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
 
+  // Método para subir una imagen para una categoría
   uploadImage(id: number, file: File): Observable<Categoria> {
     if (!id || isNaN(id)) {
       return throwError(() => new Error('ID de categoría inválido'));
@@ -43,27 +45,32 @@ export class CategoriasService {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-    return this.http.post<Categoria>(
+    return this.http.post<ApiResponseBody<Categoria>>(
       `${this.apiUrl}/${id}/upload-image`,
       formData,
       { headers: this.createHeaders(false) }
     ).pipe(
+      map(response => {
+        if (response.status?.toUpperCase() === 'SUCCESS') {
+          return response.data;
+        }
+        throw new Error(response.message || 'Error al subir la imagen');
+      }),
       catchError(this.handleError)
     );
   }
 
+  // Método para obtener todas las categorías
   getAll(): Observable<Categoria[]> {
-    console.log('[CategoriasService] getAll() invocado');
     return this.http.get<ApiResponseBody<Categoria[]>>(
       this.apiUrl,
       { headers: this.createHeaders() }
     ).pipe(
       map(response => {
-        console.log('[CategoriasService] Respuesta recibida:', response);
         if (response.status?.toUpperCase() === 'SUCCESS') {
           return response.data.map(categoria => ({
             ...categoria,
-            imagenUrl: this.buildImageUrl(categoria.imgUrl) // construimos la URL completa y la asignamos a una nueva propiedad
+            imgUrl: this.buildImageUrl(categoria.imgUrl, categoria.imgOrigen)
           }));
         }
         throw new Error(response.message || 'Error al obtener categorías');
@@ -71,12 +78,13 @@ export class CategoriasService {
       catchError(this.handleError)
     );
   }
-  
-  buildImageUrl(imagenPath: string): string {
-    // Agregar '/' entre la URL base y el path
-    return `${this.imagenBaseUrl}${imagenPath}`; // <-- Usar this. y agregar la barra
+
+  // Construye la ruta completa de imagen con el origen
+  buildImageUrl(imgUrl: string, imgOrigen: string): string {
+    return `${this.imagenBaseUrl}/${imgOrigen}/${imgUrl}`;
   }
 
+  // Encabezados HTTP
   private createHeaders(includeJsonContentType = true): HttpHeaders {
     const token = this.authService.getToken();
     let headers = new HttpHeaders();
@@ -89,6 +97,7 @@ export class CategoriasService {
     return headers;
   }
 
+  // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Error desconocido';
     if (error.error instanceof ErrorEvent) {
