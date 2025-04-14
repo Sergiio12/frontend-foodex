@@ -1,33 +1,16 @@
-<!-- categorias.component.html -->
 <app-header></app-header>
 
 <main class="main-content">
   <!-- Estado de carga -->
-  <div *ngIf="isLoading" class="loading-overlay">
-    <div class="spinner-container">
-      <div class="spinner"></div>
-      <p class="loading-text">Cargando categorías...</p>
-    </div>
-  </div>
+  <app-loading-modal *ngIf="isLoading" [message]="'Cargando categorías...'" ></app-loading-modal>
 
   <!-- Manejo de errores -->
-  <div *ngIf="errorMessage && !isLoading" class="error-container">
-    <div class="error-card">
-      <div class="error-icon-container">
-        <svg class="error-icon" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/>
-        </svg>
-      </div>
-      <h3 class="error-title">¡Ups! Algo salió mal</h3>
-      <p class="error-message">{{ errorMessage }}</p>
-      <button class="retry-button" (click)="loadCategorias()">
-        Reintentar
-        <svg class="retry-icon" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6s-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8s-3.6-8-8-8"/>
-        </svg>
-      </button>
-    </div>
-  </div>
+  <app-error-modal 
+    *ngIf="errorMessage && !isLoading"
+    [errorMessage]="errorMessage"
+    (retry)="onRetry()"
+    (close)="onCloseErrorModal()">
+  </app-error-modal>
 
   <!-- Contenido principal -->
   <div *ngIf="!isLoading && !errorMessage" class="categorias-grid">
@@ -44,7 +27,6 @@
            [class.card-hover]="hoverState === categoria.id">
         <div class="card-inner">
           <div class="image-wrapper">
-            <!-- Usamos la propiedad 'imagenUrl' ya que el servicio mapea la URL completa -->
             <img [src]="categoria.imgUrl" 
                  [alt]="categoria.nombre" 
                  class="categoria-image"

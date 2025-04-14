@@ -10,11 +10,14 @@ import { EditCategoriaModalComponent } from '../edit-categoria-modal/edit-catego
 import { finalize, switchMap, filter, map } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
+import { ErrorModalComponent } from '../error-modal/error-modal.component';
+import { LoadingModalComponent } from '../load-modal/load-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-categorias',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, HeaderComponent, FooterComponent, ErrorModalComponent, LoadingModalComponent],
   templateUrl: './categorias.component.html',
   styleUrls: ['./categorias.component.css']
 })
@@ -27,8 +30,19 @@ export class CategoriasComponent implements OnInit {
   constructor(
     private categoriasService: CategoriasService,
     private authService: AuthService,
+    private router: Router,
     public dialog: MatDialog
   ) {}
+
+  onRetry(): void {
+    this.errorMessage = null;  // Cierra el modal
+    this.loadCategorias();     // Vuelve a intentar cargar
+  }
+
+  onCloseErrorModal(): void {
+    this.errorMessage = null;
+    this.router.navigate(['/home']); // Redirige a la página principal
+  }
 
   ngOnInit(): void {
     console.log('[CategoriasComponent] ngOnInit()');
@@ -45,12 +59,11 @@ export class CategoriasComponent implements OnInit {
     ).subscribe({
       next: (categorias: Categoria[]) => {
         console.log('[CategoriasComponent] Categorías cargadas:', categorias);
-        this.categorias = categorias; // ✅ Ya están con URLs correctas desde el service
+        this.categorias = categorias; 
       },
       error: (err) => this.handleLoadError(err)
     });
   }
-    
 
   private handleLoadError(err: HttpErrorResponse): void {
     this.errorMessage = this.getErrorMessage(err);
@@ -68,26 +81,22 @@ export class CategoriasComponent implements OnInit {
     });
 
     dialogRef.afterClosed().pipe(
-      filter(result => !!result), // Solo si se obtiene un resultado
+      filter(result => !!result),
       switchMap(result => {
         if (!result.id || isNaN(result.id)) {
           return throwError(() => new Error('ID de categoría inválido'));
         }
-        
-        // Actualizar la categoría
         return this.categoriasService.updateCategoria(result).pipe(
           switchMap(updatedCategoria => {
-            // Si se ha seleccionado una nueva imagen, se procede a subirla
             if (!result.imageFile) return of(updatedCategoria);
             if (!updatedCategoria?.id) {
               return throwError(() => new Error('ID no recibido del servidor'));
             }
-
             return this.categoriasService.uploadImage(
               Number(updatedCategoria.id),
               result.imageFile
             ).pipe(
-              map(() => updatedCategoria) // Si la imagen se sube correctamente, devolvemos la categoría actualizada
+              map(() => updatedCategoria)
             );
           })
         );
@@ -99,7 +108,6 @@ export class CategoriasComponent implements OnInit {
   }
 
   private handleUpdateSuccess(updatedCategoria: Categoria): void {
-    // Reemplazamos la categoría en el array 'categorias' con la categoría actualizada
     this.categorias = this.categorias.map(c => 
       c.id === updatedCategoria.id ? updatedCategoria : c
     );
