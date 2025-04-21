@@ -1,10 +1,7 @@
-<app-header></app-header>
-
 <main class="main-content">
-  <!-- Estado de carga -->
-  <app-loading-modal *ngIf="isLoading" [message]="'Cargando categorías...'" ></app-loading-modal>
+  
+  <app-loading-modal *ngIf="isLoading" ></app-loading-modal>
 
-  <!-- Manejo de errores -->
   <app-error-modal 
     *ngIf="errorMessage && !isLoading"
     [errorMessage]="errorMessage"
@@ -12,7 +9,6 @@
     (close)="onCloseErrorModal()">
   </app-error-modal>
 
-  <!-- Contenido principal -->
   <div *ngIf="!isLoading && !errorMessage" class="categorias-grid">
     <div class="section-header">
       <h1 class="section-title">Explora Nuestras Categorías</h1>
@@ -34,7 +30,6 @@
                  loading="lazy">
             <div class="image-overlay"></div>
             
-            <!-- Botón de edición para ADMIN -->
             <button *ngIf="hasAdminRole()" class="edit-button" (click)="editCategoria(categoria)">
               <svg class="edit-icon" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3c-.4-.4-1-.4-1.4 0l-1.8 1.8L19 8.1M3 17.2V21h3.8l11-11.1l-3.7-3.8L3 17.2"/>
@@ -59,5 +54,3 @@
     </div>
   </div>
 </main>
-
-<app-footer></app-footer>

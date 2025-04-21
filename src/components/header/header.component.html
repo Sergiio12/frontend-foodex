@@ -1,14 +1,11 @@
 <header class="navbar" role="banner">
   <nav class="nav-container" aria-label="Navegación principal">
-    <!-- Sección izquierda -->
     <div class="nav-left">
       <a routerLink="/home" class="nav-brand hover-underline" aria-label="Página de inicio">Nosotros</a>
       <a routerLink="/catalogo" class="nav-link hover-underline" aria-label="Ver catálogo">Catálogo</a>
     </div>
 
-    <!-- Sección derecha -->
     <div class="nav-right">
-      <!-- Carrito -->
       <ng-container *ngIf="isLoggedIn">
         <div class="cart-container" (click)="openCart()" role="button" aria-label="Carrito de compras">
           <img src="https://cdn-icons-png.flaticon.com/512/107/107831.png" 
@@ -21,7 +18,6 @@
         </div>
       </ng-container>
 
-      <!-- Menú usuario -->
       <ng-container *ngIf="isLoggedIn; else loginTemplate">
         <div class="user-container" 
              (click)="toggleUserMenu()" 
@@ -36,7 +32,6 @@
             <path stroke="currentColor" stroke-width="2" d="M5 9l7 7 7-7"/>
           </svg>
           
-          <!-- Menú desplegable -->
           <div class="user-menu" 
                [class.active]="isUserMenuOpen"
                role="menu"

@@ -1,4 +1,3 @@
-/* Variables globales */
 :root {
   --primary: #7d4aff;
   --secondary: #00e0ff;
@@ -15,7 +14,6 @@
   --spinner-color: white;
 }
 
-/* General Styling */
 *,
 *::before,
 *::after {
@@ -34,10 +32,9 @@ main {
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
-  padding-bottom: 5rem; /* Espacio para el footer */
+  padding-bottom: 5rem;
 }
 
-/* Contenedor principal */
 .login-container {
   display: flex;
   min-height: 100vh;
@@ -50,7 +47,6 @@ main {
   overflow: hidden;
 }
 
-/* Tarjeta de login */
 .login-card {
   background: var(--glass);
   backdrop-filter: blur(20px);
@@ -88,7 +84,6 @@ main {
   100% { transform: translate(150%, 150%) rotate(45deg); }
 }
 
-/* Encabezado */
 .login-header {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -113,14 +108,12 @@ main {
   letter-spacing: 0.5px;
 }
 
-/* Formulario */
 .form {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-/* Inputs con etiqueta flotante */
 .floating-label {
   position: relative;
   margin-bottom: 1.5rem;
@@ -171,7 +164,6 @@ main {
   font-weight: 500;
 }
 
-/* Indicadores de error */
 .error-list {
   font-size: 0.8rem;
 }
@@ -189,7 +181,6 @@ main {
   75% { transform: translateX(6px); }
 }
 
-/* Botón para mostrar/ocultar contraseña */
 .toggle-password {
   position: absolute;
   right: 1.2rem;
@@ -209,7 +200,6 @@ main {
   transform: translateY(-50%) scale(1.1);
 }
 
-/* Botón de envío */
 .submit-btn {
   position: relative;
   width: 100%;
@@ -236,7 +226,6 @@ main {
   cursor: not-allowed;
 }
 
-/* Efecto "shine" en el botón */
 .submit-btn::after {
   content: '';
   position: absolute;
@@ -257,7 +246,6 @@ main {
   to { left: 100%; }
 }
 
-/* Spinner personalizado mejorado */
 .custom-spinner {
   position: absolute;
   top: 50%;
@@ -292,7 +280,6 @@ main {
   100% { transform: rotate(360deg); }
 }
 
-/* Contenido del botón */
 .submit-btn .btn-content {
   position: relative;
   display: flex;
@@ -306,7 +293,6 @@ main {
   visibility: hidden;
 }
 
-/* Enlace de registro */
 .register-link {
   text-align: center;
   color: #636e72;
@@ -326,7 +312,6 @@ main {
   transform: translateY(-1px);
 }
 
-/* Responsivo */
 @media (max-width: 480px) {
   .login-container {
     padding: 1.2rem;
@@ -343,7 +328,6 @@ main {
   }
 }
 
-/* Notificación global mejorada */
 .global-notification {
   position: fixed;
   top: -100px;
@@ -412,7 +396,6 @@ main {
   }
 }
 
-/* Progreso visual en notificaciones */
 .global-notification::after {
   content: '';
   position: absolute;
@@ -435,7 +418,6 @@ main {
   }
 }
 
-/* Botón de cierre */
 .close-notification {
   margin-left: auto;
   background: transparent;

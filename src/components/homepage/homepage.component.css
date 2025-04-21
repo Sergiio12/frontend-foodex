@@ -1,10 +1,10 @@
-  /* 
-   |----------------------------------------|
-   |              BIENVENIDA                |
-   |----------------------------------------|
-   */
+/* 
+ |----------------------------------------|
+ |              BIENVENIDA                |
+ |----------------------------------------|
+ */
 
-.hero {
+ .hero {
   height: calc(100vh - 80px);
   display: flex;
   align-items: center;
@@ -35,11 +35,11 @@
   margin-bottom: 2.5rem;
 }
 
-  /* 
-   |----------------------------------------|
-   |              BOTONERA                  |
-   |----------------------------------------|
-   */
+/* 
+ |----------------------------------------|
+ |              BOTONERA                  |
+ |----------------------------------------|
+ */
 
 .cta-buttons {
   display: flex;
@@ -71,11 +71,11 @@
   color: #6a11cb;
 }
 
-  /* 
-   |----------------------------------------|
-   |            ABOUT SECTION               |
-   |----------------------------------------|
-   */
+/* 
+ |----------------------------------------|
+ |            ABOUT SECTION               |
+ |----------------------------------------|
+ */
 
 .about {
   padding: 6rem 5%;
@@ -117,11 +117,11 @@
   background: url(' ../../../assets/images/supermercado.jpg') center/cover;
 }
 
-  /* 
-   |----------------------------------------|
-   |          FEATURES SECTION              |
-   |----------------------------------------|
-   */
+/* 
+ |----------------------------------------|
+ |          FEATURES SECTION              |
+ |----------------------------------------|
+ */
 
 .features {
     padding: 8rem 5%;
@@ -272,8 +272,7 @@
     text-transform: uppercase;
     font-family: 'Poppins', sans-serif;
 }
-  
-  /* Título específico para Features */
+
 .features .section-title:first-of-type {
     display: block;
     width: fit-content;
@@ -281,7 +280,7 @@
     padding: 0 2.5rem 1.5rem;
     position: relative;
 }
-  
+
 .features .section-title:first-of-type::after {
     content: '';
     position: absolute;
@@ -294,7 +293,7 @@
     border-radius: 2px;
     animation: underlinePulse 3s ease-in-out infinite;
 } 
-  
+
 .section-title::after {
     content: '';
     position: absolute;
@@ -308,7 +307,7 @@
     animation: underlinePulse 3s ease-in-out infinite;
     box-shadow: 0 0 15px rgba(106,17,203,0.3);
 }
-  
+
 .section-title::before {
     content: attr(data-text);
     position: absolute;
@@ -331,11 +330,11 @@
   animation: float 6s ease-in-out infinite 3s;
 }
 
-  /* 
-   |----------------------------------------|
-   |            RESPONSIVIDAD               |
-   |----------------------------------------|
-   */
+/* 
+ |----------------------------------------|
+ |            RESPONSIVIDAD               |
+ |----------------------------------------|
+ */
 
 @media (max-width: 768px) {
     .nav-links {
@@ -346,50 +345,24 @@
       right: 0;
       background: rgba(15, 23, 42, 0.98);
     }
-  
+
     .features-container {
       grid-template-columns: 1fr;
     }
-    
+
     .feature-card {
       min-height: auto;
       padding: 2rem;
     }
-  
+
 }
-  
+
 @media (max-width: 480px) {
     .hero h1 {
       font-size: 2rem;
     }
-  
+
     .feature-item {
       height: 300px;
     }
-  
-    .cta-button {
-      width: 100%;
-    }
-}
-  
-  /* 
-  |----------------------------------------|
-  |          ANIMACIONES                   |
-  |----------------------------------------|
-  */
-
-@keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
 }

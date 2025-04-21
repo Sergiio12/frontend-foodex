@@ -5,8 +5,6 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { HeaderComponent } from '../../header/header.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -16,9 +14,7 @@ import { lastValueFrom } from 'rxjs';
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    FaIconComponent,
-    HeaderComponent,
-    FooterComponent
+    FaIconComponent
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -30,12 +26,10 @@ export class LoginComponent implements OnDestroy {
   notification: { type: 'success' | 'error'; message: string } | null = null;
   private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  // Iconos
   faSpinner = faSpinner;
   faEye = faEye;
   faEyeSlash = faEyeSlash;
 
-  // Llave para almacenar el token
   private readonly TOKEN_KEY = 'authToken';
 
   constructor(
@@ -61,6 +55,14 @@ export class LoginComponent implements OnDestroy {
     this.showPassword = !this.showPassword;
   }
 
+  clearNotification(): void {
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+      this.notificationTimeout = null;
+    }
+    this.notification = null;
+  }
+
   async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.markAllAsTouched();
@@ -75,7 +77,6 @@ export class LoginComponent implements OnDestroy {
         this.authService.authenticate(this.loginForm.value)
       );
       
-      // Guarda el token usando la llave definida
       localStorage.setItem(this.TOKEN_KEY, response.data.token);
       
       this.showNotification('success', 'Inicio de sesión exitoso. Redirigiendo...');
@@ -89,6 +90,10 @@ export class LoginComponent implements OnDestroy {
     } finally {
       this.loading = false;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.clearNotification();
   }
 
   private markAllAsTouched(): void {
@@ -105,19 +110,7 @@ export class LoginComponent implements OnDestroy {
     }, 4000);
   }
 
-  clearNotification(): void {
-    if (this.notificationTimeout) {
-      clearTimeout(this.notificationTimeout);
-      this.notificationTimeout = null;
-    }
-    this.notification = null;
-  }
-
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  ngOnDestroy(): void {
-    this.clearNotification();
   }
 }

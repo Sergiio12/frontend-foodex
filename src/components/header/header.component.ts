@@ -13,14 +13,12 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  // Estado de la aplicación
   isLoggedIn = false;
   username: string | null = null;
   isUserMenuOpen = false;
   isMobile = false;
   cartItems = 0;
 
-  // Gestión de suscripciones
   private subscriptions = new Subscription();
 
   constructor(
@@ -35,8 +33,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.setupCartListener();
     this.loadInitialCart();
   }
-
-  // ==================== MÉTODOS PRIVADOS ====================
+  
   private checkViewport(): void {
     this.isMobile = window.innerWidth <= 768;
   }
@@ -93,7 +90,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isUserMenuOpen = false;
   }
 
-  // ==================== MANEJO DE ERRORES ====================
   private handleAuthError(error: any): void {
     console.error('Error de autenticación:', error);
     this.clearSession();
@@ -109,7 +105,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.cartItems = 0;
   }
 
-  // ==================== INTERACCIÓN DEL USUARIO ====================
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
@@ -138,7 +133,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  // ==================== RESPONSIVE DESIGN ====================
   @HostListener('window:resize')
   onWindowResize(): void {
     this.checkViewport();
@@ -157,7 +151,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ==================== LIMPIEZA ====================
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

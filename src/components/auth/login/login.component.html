@@ -1,14 +1,10 @@
-<app-header></app-header>
-
-<!-- Notificación flotante -->
 <div 
   class="global-notification" 
   *ngIf="notification" 
   [ngClass]="{
     'success': notification.type === 'success',
     'error': notification.type === 'error',
-    'show': notification
-  }" 
+    'show': true }" 
   role="alert" 
   aria-live="assertive"
 >
@@ -19,8 +15,7 @@
   <button 
     class="close-notification" 
     (click)="clearNotification()" 
-    aria-label="Cerrar notificación"
-  >
+    aria-label="Cerrar notificación">
     &times;
   </button>
 </div>
@@ -38,13 +33,11 @@
       [formGroup]="loginForm" 
       (ngSubmit)="onSubmit()" 
       class="form" 
-      aria-describedby="form-instructions"
-    >
+      aria-describedby="form-instructions">
       <p id="form-instructions" class="sr-only">
         Por favor, completa los campos requeridos para iniciar sesión.
       </p>
 
-      <!-- Campo de usuario -->
       <div class="input-group">
         <div class="floating-label">
           <input
@@ -53,9 +46,8 @@
             formControlName="username"
             placeholder=" "
             [class.invalid]="username.invalid && username.touched"
-            aria-required="true"
             [attr.aria-invalid]="username.invalid && username.touched"
-          >
+            aria-required="true">
           <label for="username">Nombre de usuario</label>
           <div class="input-decoration"></div>
         </div>
@@ -69,7 +61,6 @@
         </div>
       </div>
 
-      <!-- Campo de contraseña -->
       <div class="input-group">
         <div class="floating-label">
           <input
@@ -78,17 +69,15 @@
             formControlName="password"
             placeholder=" "
             [class.invalid]="password.invalid && password.touched"
-            aria-required="true"
             [attr.aria-invalid]="password.invalid && password.touched"
-          >
+            aria-required="true">
           <label for="password">Contraseña</label>
           <div class="input-decoration"></div>
           <button 
             type="button" 
             class="toggle-password"
             (click)="togglePassword()"
-            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          >
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
             <fa-icon [icon]="showPassword ? faEyeSlash : faEye"></fa-icon>
           </button>
         </div>
@@ -99,13 +88,11 @@
         </div>
       </div>
 
-      <!-- Botón de submit -->
       <button 
         type="submit" 
         class="submit-btn"
         [disabled]="loading"
-        [class.loading]="loading"
-      >
+        [class.loading]="loading">
         <span class="btn-content">
           <span class="btn-text" [class.hidden]="loading">Ingresar</span>
           <div *ngIf="loading" class="custom-spinner" aria-hidden="true">
@@ -115,7 +102,6 @@
         </span>
       </button>
 
-      <!-- Enlace de registro -->
       <div class="links">
         <a routerLink="/signup" class="register-link">
           ¿Primera vez aquí? 
@@ -125,5 +111,3 @@
     </form>
   </section>
 </main>
-
-<app-footer></app-footer>

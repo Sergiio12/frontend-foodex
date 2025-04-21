@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Categoria } from '../../model/Categoria';
 import { CategoriasService } from '../../services/categorias.service';
-import { HeaderComponent } from '../header/header.component';
-import { FooterComponent } from '../footer/footer.component';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,7 +15,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-categorias',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent, ErrorModalComponent, LoadingModalComponent],
+  imports: [CommonModule, ErrorModalComponent, LoadingModalComponent],
   templateUrl: './categorias.component.html',
   styleUrls: ['./categorias.component.css']
 })
@@ -34,16 +32,6 @@ export class CategoriasComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
-  onRetry(): void {
-    this.errorMessage = null;  // Cierra el modal
-    this.loadCategorias();     // Vuelve a intentar cargar
-  }
-
-  onCloseErrorModal(): void {
-    this.errorMessage = null;
-    this.router.navigate(['/home']); // Redirige a la página principal
-  }
-
   ngOnInit(): void {
     console.log('[CategoriasComponent] ngOnInit()');
     this.loadCategorias();
@@ -53,9 +41,21 @@ export class CategoriasComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = null;
     console.log('[CategoriasComponent] Cargando categorías...');
+    const startTime = Date.now(); 
   
     this.categoriasService.getAll().pipe(
-      finalize(() => this.isLoading = false)
+      finalize(() => {
+        const elapsedTime = Date.now() - startTime;
+        const remainingDelay = 2000 - elapsedTime;
+  
+        if (remainingDelay > 0) {
+          setTimeout(() => {
+            this.isLoading = false;
+          }, remainingDelay);
+        } else {
+          this.isLoading = false;
+        }
+      })
     ).subscribe({
       next: (categorias: Categoria[]) => {
         console.log('[CategoriasComponent] Categorías cargadas:', categorias);
@@ -65,9 +65,14 @@ export class CategoriasComponent implements OnInit {
     });
   }
 
-  private handleLoadError(err: HttpErrorResponse): void {
-    this.errorMessage = this.getErrorMessage(err);
-    console.error('[CategoriasComponent] Error:', err);
+  onRetry(): void {
+    this.errorMessage = null;
+    this.loadCategorias();
+  }
+
+  onCloseErrorModal(): void {
+    this.errorMessage = null;
+    this.router.navigate(['/home']);
   }
 
   hasAdminRole(): boolean {
@@ -107,6 +112,11 @@ export class CategoriasComponent implements OnInit {
     });
   }
 
+  private handleLoadError(err: HttpErrorResponse): void {
+    this.errorMessage = this.getErrorMessage(err);
+    console.error('[CategoriasComponent] Error:', err);
+  }
+
   private handleUpdateSuccess(updatedCategoria: Categoria): void {
     this.categorias = this.categorias.map(c => 
       c.id === updatedCategoria.id ? updatedCategoria : c
@@ -122,7 +132,7 @@ export class CategoriasComponent implements OnInit {
     this.errorMessage = message;
     console.error('Error actualizando categoría:', err);
     
-    setTimeout(() => this.errorMessage = null, 5000); // Autoocultar el error después de 5 segundos
+    setTimeout(() => this.errorMessage = null, 5000);
   }
 
   private getErrorMessage(err: HttpErrorResponse): string {

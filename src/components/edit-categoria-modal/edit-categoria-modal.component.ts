@@ -19,20 +19,6 @@ export class EditCategoriaModalComponent {
   errorMessage: string | null = null;
   isSubmitting = false;
 
-  // Validación personalizada para imagen
-  private imageValidator() {
-    return (control: FormGroup) => {
-      const file = this.selectedFile;
-      const url = control.get('imagenUrl')?.value;
-      
-      if (!file && !url) {
-        control.get('imagenUrl')?.setErrors({ required: true });
-        return { required: true };
-      }
-      return null;
-    };
-  }
-
   constructor(
     public dialogRef: MatDialogRef<EditCategoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { categoria: Categoria },
@@ -57,7 +43,6 @@ export class EditCategoriaModalComponent {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validar tipo y tamaño de archivo
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxSize = 2 * 1024 * 1024; // 2MB
     
@@ -83,7 +68,7 @@ export class EditCategoriaModalComponent {
 
   clearImage(): void {
     this.selectedFile = null;
-    this.previewUrl = this.data.categoria.imgUrl; // Restaurar imagen original
+    this.previewUrl = this.data.categoria.imgUrl;
     this.editForm.patchValue({ imagenUrl: this.data.categoria.imgUrl });
     this.errorMessage = null;
   }
@@ -91,7 +76,6 @@ export class EditCategoriaModalComponent {
   saveChanges(): void {
     this.editForm.markAllAsTouched();
   
-    // Validación combinada
     if (!this.selectedFile && !this.editForm.value.imagenUrl) {
       this.errorMessage = 'Debe proporcionar una imagen o URL';
       return;
@@ -105,7 +89,7 @@ export class EditCategoriaModalComponent {
     const categoriaActualizada = {
       ...this.data.categoria,
       ...this.editForm.value,
-      imageFile: this.selectedFile  // Campo especial para el archivo
+      imageFile: this.selectedFile 
     };
   
     this.dialogRef.close(categoriaActualizada);
@@ -115,7 +99,6 @@ export class EditCategoriaModalComponent {
     this.dialogRef.close();
   }
 
-  // Helper para mensajes de error
   getError(controlName: string): string | null {
     const control = this.editForm.get(controlName);
     
@@ -135,4 +118,18 @@ export class EditCategoriaModalComponent {
     
     return null;
   }
+
+  private imageValidator() {
+    return (control: FormGroup) => {
+      const file = this.selectedFile;
+      const url = control.get('imagenUrl')?.value;
+
+      if (!file && !url) {
+        control.get('imagenUrl')?.setErrors({ required: true });
+        return { required: true };
+      }
+      return null;
+    };
+  }
+
 }

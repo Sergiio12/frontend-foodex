@@ -5,8 +5,6 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { HeaderComponent } from '../../header/header.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { catchError, finalize, lastValueFrom } from 'rxjs';
 
 @Component({
@@ -17,8 +15,6 @@ import { catchError, finalize, lastValueFrom } from 'rxjs';
     ReactiveFormsModule,
     RouterModule,
     FaIconComponent,
-    HeaderComponent,
-    FooterComponent
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
@@ -78,14 +74,6 @@ export class RegisterComponent implements OnDestroy {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  private passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
-    const password = group.get('password')?.value;
-    const confirmPassword = group.get('confirmPassword')?.value;
-    return password && confirmPassword && password !== confirmPassword
-      ? { passwordMismatch: true }
-      : null;
-  }
-
   async onSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.markAllAsTouched();
@@ -113,6 +101,18 @@ export class RegisterComponent implements OnDestroy {
     }
   }
 
+  ngOnDestroy(): void {
+    this.clearNotification();
+  }
+
+  private passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
+    const password = group.get('password')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
+    return password && confirmPassword && password !== confirmPassword
+      ? { passwordMismatch: true }
+      : null;
+  }
+
   private markAllAsTouched(): void {
     Object.values(this.registerForm.controls).forEach((control) => {
       control.markAsTouched();
@@ -127,7 +127,7 @@ export class RegisterComponent implements OnDestroy {
     }, 4000);
   }
 
-  clearNotification(): void {
+  private clearNotification(): void {
     if (this.notificationTimeout) {
       clearTimeout(this.notificationTimeout);
       this.notificationTimeout = null;
@@ -137,9 +137,5 @@ export class RegisterComponent implements OnDestroy {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  ngOnDestroy(): void {
-    this.clearNotification();
   }
 }
