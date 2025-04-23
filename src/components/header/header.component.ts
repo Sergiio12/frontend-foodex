@@ -128,6 +128,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     );
   }
 
+  navigateToCatalogo(): void {
+    if (this.isLoggedIn) {
+      this.router.navigate(['/catalogo']);
+    } else {
+      this.router.navigate(['/login'], { 
+        queryParams: { returnUrl: '/catalogo' } 
+      });
+    }
+  }
+
   private performLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

@@ -74,6 +74,14 @@ export class RegisterComponent implements OnDestroy {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
+  clearNotification(): void {
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+      this.notificationTimeout = null;
+    }
+    this.notification = null;
+  }
+
   async onSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.markAllAsTouched();
@@ -125,14 +133,6 @@ export class RegisterComponent implements OnDestroy {
     this.notificationTimeout = setTimeout(() => {
       this.notification = null;
     }, 4000);
-  }
-
-  private clearNotification(): void {
-    if (this.notificationTimeout) {
-      clearTimeout(this.notificationTimeout);
-      this.notificationTimeout = null;
-    }
-    this.notification = null;
   }
 
   private delay(ms: number): Promise<void> {

@@ -41,27 +41,19 @@ export class CategoriasComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = null;
     console.log('[CategoriasComponent] Cargando categorías...');
-    const startTime = Date.now(); 
   
-    this.categoriasService.getAll().pipe(
-      finalize(() => {
-        const elapsedTime = Date.now() - startTime;
-        const remainingDelay = 2000 - elapsedTime;
-  
-        if (remainingDelay > 0) {
-          setTimeout(() => {
-            this.isLoading = false;
-          }, remainingDelay);
-        } else {
-          this.isLoading = false;
-        }
-      })
-    ).subscribe({
+    this.categoriasService.getAll().subscribe({
       next: (categorias: Categoria[]) => {
         console.log('[CategoriasComponent] Categorías cargadas:', categorias);
         this.categorias = categorias; 
+        this.isLoading = false;
       },
-      error: (err) => this.handleLoadError(err)
+      error: (err) => {
+        setTimeout(() => {
+          this.isLoading = false;
+          this.handleLoadError(err);
+        }, 3000);
+      }
     });
   }
 
@@ -118,9 +110,15 @@ export class CategoriasComponent implements OnInit {
   }
 
   private handleUpdateSuccess(updatedCategoria: Categoria): void {
-    this.categorias = this.categorias.map(c => 
-      c.id === updatedCategoria.id ? updatedCategoria : c
-    );
+    this.categorias = this.categorias.map(c => {
+      if (c.id === updatedCategoria.id) {
+        return {
+          ...updatedCategoria,
+          imgUrl: updatedCategoria.imgUrl || c.imgUrl
+        };
+      }
+      return c;
+    });
     this.errorMessage = null;
   }
 

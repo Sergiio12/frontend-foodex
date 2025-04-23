@@ -2,7 +2,7 @@
   <nav class="nav-container" aria-label="Navegación principal">
     <div class="nav-left">
       <a routerLink="/home" class="nav-brand hover-underline" aria-label="Página de inicio">Nosotros</a>
-      <a routerLink="/catalogo" class="nav-link hover-underline" aria-label="Ver catálogo">Catálogo</a>
+      <a class="nav-link hover-underline" (click)="navigateToCatalogo()" role="button" aria-label="Ver catálogo"> Catálogo </a>
     </div>
 
     <div class="nav-right">
@@ -36,9 +36,6 @@
                [class.active]="isUserMenuOpen"
                role="menu"
                *ngIf="isUserMenuOpen">
-            <div class="menu-item" role="menuitem" routerLink="/profile">
-              <i class="icon-user" aria-hidden="true"></i>Perfil
-            </div>
             <div class="menu-item" role="menuitem" routerLink="/settings">
               <i class="icon-settings" aria-hidden="true"></i>Configuración
             </div>

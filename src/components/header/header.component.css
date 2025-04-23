@@ -27,6 +27,7 @@
 
 .nav-brand {
   font-size: 1.4rem;
+  margin-left: -30px;
   font-weight: 600;
   color: #e2e8f0;
   text-decoration: none;
@@ -38,6 +39,10 @@
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s ease;
+}
+
+.nav-link[role="button"] {
+  cursor: pointer;
 }
 
 .hover-underline {
