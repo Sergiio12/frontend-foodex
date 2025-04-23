@@ -1,71 +1,70 @@
 import { Component, OnInit } from '@angular/core';
-import { Categoria } from '../../model/Categoria';
-import { CategoriasService } from '../../services/categorias.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProductosService } from '../../services/productos.service';
+import { Producto } from '../../model/Producto';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
-import { EditCategoriaModalComponent } from '../edit-categoria-modal/edit-categoria-modal.component';
-import { switchMap, filter, map } from 'rxjs/operators';
+import { EditProductoModalComponent } from '../edit-producto-modal/edit-producto-modal.component';
+import { finalize, switchMap, filter, map } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
-import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-categorias',
+  selector: 'app-productos',
   standalone: true,
   imports: [CommonModule, ErrorModalComponent, LoadingModalComponent],
-  templateUrl: './categorias.component.html',
-  styleUrls: ['./categorias.component.css']
+  templateUrl: './productos.component.html',
+  styleUrls: ['./productos.component.css']
 })
-export class CategoriasComponent implements OnInit {
-  categorias: Categoria[] = [];
+export class ProductosComponent implements OnInit {
+  productos: Producto[] = [];
   errorMessage: string | null = null;
   isLoading: boolean = true;
   hoverState: number | null = null;
 
   constructor(
-    private categoriasService: CategoriasService,
+    private productosService: ProductosService,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    console.log('[CategoriasComponent] ngOnInit()');
-    this.loadCategorias();
+    this.route.queryParams.subscribe(params => {
+      this.loadProductos(params['categoriaId']);
+    });
   }
 
-  loadCategorias(): void {
+  loadProductos(categoriaId?: number): void {
+    console.log('[ProductosComponent] Cargando productos para categoría ID:', categoriaId || 'todas');
     this.isLoading = true;
     this.errorMessage = null;
-    console.log('[CategoriasComponent] Cargando categorías...');
   
-    this.categoriasService.getAll().subscribe({
-      next: (categorias: Categoria[]) => {
-        console.log('[CategoriasComponent] Categorías cargadas:', categorias);
-        this.categorias = categorias; 
+    const productos$ = categoriaId 
+      ? this.productosService.getByCategoria(categoriaId)
+      : this.productosService.getAll();
+  
+    productos$.subscribe({
+      next: (productos: Producto[]) => {
+        console.log('[ProductosComponent] Productos recibidos:', productos);
+        this.productos = productos;
         this.isLoading = false;
       },
       error: (err) => {
-        setTimeout(() => {
-          this.isLoading = false;
-          this.handleLoadError(err);
-        }, 3000);
+        console.error('[ProductosComponent] Error cargando productos:', err);
+        this.isLoading = false;
+        this.handleLoadError(err);
       }
     });
   }
 
-  verProductos(categoriaId: number): void {
-    this.router.navigate(['/productos'], {
-      queryParams: { categoriaId }
-    });
-  }
-  
   onRetry(): void {
     this.errorMessage = null;
-    this.loadCategorias();
+    this.loadProductos();
   }
 
   onCloseErrorModal(): void {
@@ -77,53 +76,50 @@ export class CategoriasComponent implements OnInit {
     return this.authService.hasRole('ROLE_ADMIN');
   }
 
-  editCategoria(categoria: Categoria): void {
-    const dialogRef = this.dialog.open(EditCategoriaModalComponent, {
+  editProducto(producto: Producto): void {
+    const dialogRef = this.dialog.open(EditProductoModalComponent, {
       width: '600px',
-      data: { categoria: { ...categoria } }
+      data: { producto: { ...producto } }
     });
 
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
       switchMap(result => {
         if (!result.id || isNaN(result.id)) {
-          return throwError(() => new Error('ID de categoría inválido'));
+          return throwError(() => new Error('ID de producto inválido'));
         }
-        return this.categoriasService.updateCategoria(result).pipe(
-          switchMap(updatedCategoria => {
-            if (!result.imageFile) return of(updatedCategoria);
-            if (!updatedCategoria?.id) {
-              return throwError(() => new Error('ID no recibido del servidor'));
-            }
-            return this.categoriasService.uploadImage(
-              Number(updatedCategoria.id),
+        return this.productosService.updateProducto(result).pipe(
+          switchMap(updatedProducto => {
+            if (!result.imageFile) return of(updatedProducto);
+            return this.productosService.uploadImage(
+              Number(updatedProducto.id),
               result.imageFile
             ).pipe(
-              map(() => updatedCategoria)
+              map(() => updatedProducto)
             );
           })
         );
       })
     ).subscribe({
-      next: (finalCategoria) => this.handleUpdateSuccess(finalCategoria),
+      next: (finalProducto) => this.handleUpdateSuccess(finalProducto),
       error: (err) => this.handleUpdateError(err)
     });
   }
 
   private handleLoadError(err: HttpErrorResponse): void {
     this.errorMessage = this.getErrorMessage(err);
-    console.error('[CategoriasComponent] Error:', err);
+    console.error('[ProductosComponent] Error:', err);
   }
 
-  private handleUpdateSuccess(updatedCategoria: Categoria): void {
-    this.categorias = this.categorias.map(c => {
-      if (c.id === updatedCategoria.id) {
+  private handleUpdateSuccess(updatedProducto: Producto): void {
+    this.productos = this.productos.map(p => {
+      if (p.id === updatedProducto.id) {
         return {
-          ...updatedCategoria,
-          imgUrl: updatedCategoria.imgUrl || c.imgUrl
+          ...updatedProducto,
+          imgUrl: updatedProducto.imgUrl || p.imgUrl
         };
       }
-      return c;
+      return p;
     });
     this.errorMessage = null;
   }
@@ -134,7 +130,7 @@ export class CategoriasComponent implements OnInit {
       : err.message;
     
     this.errorMessage = message;
-    console.error('Error actualizando categoría:', err);
+    console.error('Error actualizando producto:', err);
     
     setTimeout(() => this.errorMessage = null, 5000);
   }
@@ -144,7 +140,7 @@ export class CategoriasComponent implements OnInit {
     if (err.status === 400) return 'Datos inválidos enviados al servidor';
     if (err.status === 401) return 'Sesión expirada. Por favor, inicie sesión nuevamente.';
     if (err.status === 403) return 'No tiene permisos para esta acción';
-    if (err.status === 404) return 'Categoría no encontrada';
+    if (err.status === 404) return 'Producto no encontrado';
     if (err.status === 413) return 'La imagen es demasiado grande (Máx 2MB)';
     if (err.status === 415) return 'Formato de imagen no soportado';
     return err.error?.message || err.message || 'Error desconocido';

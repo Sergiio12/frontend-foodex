@@ -42,8 +42,10 @@
               <h3 class="categoria-title">{{ categoria.nombre }}</h3>
               <p class="categoria-description">{{ categoria.descripcion }}</p>
             </div>
-            <button class="explore-button">
-              Ver productos
+            <button 
+              class="explore-button" 
+              (click)="verProductos(categoria.id)">
+                Ver productos
               <svg class="arrow-icon" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.4 1.4l7.9-7.9l-7.9-7.9l-1.4 1.4L16 11H4"/>
               </svg>

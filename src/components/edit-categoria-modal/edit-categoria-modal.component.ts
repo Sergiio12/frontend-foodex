@@ -15,13 +15,13 @@ import { Categoria } from '../../model/Categoria';
 export class EditCategoriaModalComponent {
   editForm: FormGroup;
   selectedFile: File | null = null;
-  previewUrl: string | ArrayBuffer | null;
+  previewUrl?: string | ArrayBuffer | null;
   errorMessage: string | null = null;
   isSubmitting = false;
 
   private originalName: string;
   private originalDesc: string;
-  private originalImageUrl: string;
+  private originalImageUrl?: string;
 
   constructor(
     public dialogRef: MatDialogRef<EditCategoriaModalComponent>,

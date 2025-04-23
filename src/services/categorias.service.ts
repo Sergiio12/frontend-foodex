@@ -5,6 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { Categoria } from '../model/Categoria';
 import { AuthService } from './auth.service';
 import { ApiResponseBody } from '../model/ApiResponseBody';
+import { ImagenOrigen } from '../model/ImagenOrigen';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,6 @@ export class CategoriasService {
     private authService: AuthService
   ) {}
 
-  // Método para actualizar una categoría
   updateCategoria(categoria: Categoria): Observable<Categoria> {
     return this.http.put<ApiResponseBody<Categoria>>(
       `${this.apiUrl}/${categoria.id}`,
@@ -28,12 +28,14 @@ export class CategoriasService {
       },
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => response.data),
+      map(response => ({
+        ...response.data,
+        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
+      })),
       catchError(this.handleError)
     );
   }
 
-  // Método para subir una imagen para una categoría
   uploadImage(id: number, file: File): Observable<Categoria> {
     if (!id || isNaN(id)) {
       return throwError(() => new Error('ID de categoría inválido'));
@@ -50,17 +52,14 @@ export class CategoriasService {
       formData,
       { headers: this.createHeaders(false) }
     ).pipe(
-      map(response => {
-        if (response.status?.toUpperCase() === 'SUCCESS') {
-          return response.data;
-        }
-        throw new Error(response.message || 'Error al subir la imagen');
-      }),
+      map(response => ({
+        ...response.data,
+        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
+      })),
       catchError(this.handleError)
     );
   }
 
-  // Método para obtener todas las categorías
   getAll(): Observable<Categoria[]> {
     return this.http.get<ApiResponseBody<Categoria[]>>(
       this.apiUrl,
@@ -79,12 +78,14 @@ export class CategoriasService {
     );
   }
 
-  // Construye la ruta completa de imagen con el origen
-  buildImageUrl(imgUrl: string, imgOrigen: string): string {
-    return `${this.imagenBaseUrl}/${imgOrigen}/${imgUrl}`;
+  buildImageUrl(imgUrl?: string, imgOrigen?: ImagenOrigen): string {
+    if (!imgUrl || !imgOrigen) {
+      return 'assets/images/placeholder-category.jpg';
+    }
+    const encodedImgUrl = encodeURIComponent(imgUrl);
+    return `${this.imagenBaseUrl}/${imgOrigen}/${encodedImgUrl}`;
   }
 
-  // Encabezados HTTP
   private createHeaders(includeJsonContentType = true): HttpHeaders {
     const token = this.authService.getToken();
     let headers = new HttpHeaders();
@@ -97,7 +98,6 @@ export class CategoriasService {
     return headers;
   }
 
-  // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Error desconocido';
     if (error.error instanceof ErrorEvent) {
