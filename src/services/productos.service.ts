@@ -20,14 +20,26 @@ export class ProductosService {
   ) {}
 
   updateProducto(producto: Producto): Observable<Producto> {
+    // Crear payload seguro sin modificar categoría
+    const safeProducto: Producto = {
+      ...producto,
+      categoria: {
+        id: producto.categoria.id, // Mantener solo el ID original
+        nombre: '', // Campos dummy no utilizados
+        descripcion: '',
+        imgUrl: '',
+        imgOrigen: ImagenOrigen.STATIC
+      }
+    };
+  
     return this.http.put<ApiResponseBody<Producto>>(
-      `${this.apiUrl}/${producto.id}`,
-      producto,
+      `${this.apiUrl}`,
+      safeProducto,
       { headers: this.createHeaders() }
     ).pipe(
       map(response => ({
         ...response.data,
-        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
+        categoria: producto.categoria // Mantener categoría original en front
       })),
       catchError(this.handleError)
     );

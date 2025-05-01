@@ -139,25 +139,22 @@ export class EditProductoModalComponent {
       this.errorMessage = 'No se detectaron cambios para guardar';
       return;
     }
-
-    if (this.editForm.invalid) {
-      this.editForm.markAllAsTouched();
-      this.errorMessage = 'Por favor complete todos los campos requeridos';
-      return;
-    }
-
+  
     const formValue = this.editForm.value;
+    
+    // Mantener categoría original sin cambios
     const updatedProduct: Producto & { imageFile?: File } = {
-      ...this.data.producto,
+      ...this.data.producto, // Campos originales incluyendo categoría
       nombre: formValue.nombre.trim(),
       descripcion: formValue.descripcion.trim(),
-      precio: parseFloat(formValue.precio.toFixed(2)),
+      precio: parseFloat(formValue.precio),
       stock: Math.floor(formValue.stock),
       descatalogado: formValue.descatalogado,
       imgUrl: this.selectedFile ? undefined : this.originalImageUrl,
       ...(this.selectedFile && { imageFile: this.selectedFile })
     };
-
+  
+    console.log('Producto a actualizar:', JSON.stringify(updatedProduct, null, 2));
     this.dialogRef.close(updatedProduct);
   }
 

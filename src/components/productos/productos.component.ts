@@ -24,6 +24,7 @@ export class ProductosComponent implements OnInit {
   errorMessage: string | null = null;
   isLoading: boolean = true;
   hoverState: number | null = null;
+  lastOperation: { type: 'update' | 'upload', product?: Producto, file?: File } | null = null;
 
   constructor(
     private productosService: ProductosService,
@@ -63,8 +64,18 @@ export class ProductosComponent implements OnInit {
   }
 
   onRetry(): void {
-    this.errorMessage = null;
-    this.loadProductos();
+    if (this.lastOperation) {
+      this.errorMessage = null;
+      this.isLoading = true;
+
+      if (this.lastOperation.type === 'update') {
+        this.retryUpdate();
+      } else if (this.lastOperation.type === 'upload') {
+        this.retryUpload();
+      }
+    } else {
+      this.loadProductos(); // Fallback si no hay última operación registrada
+    }
   }
 
   onCloseErrorModal(): void {
@@ -79,24 +90,30 @@ export class ProductosComponent implements OnInit {
   editProducto(producto: Producto): void {
     const dialogRef = this.dialog.open(EditProductoModalComponent, {
       width: '600px',
-      data: { producto: { ...producto } }
+      data: { 
+        producto: { 
+          ...producto,
+          categoria: { ...producto.categoria } // Clonar categoría
+        } 
+      }
     });
-
+  
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
       switchMap(result => {
-        if (!result.id || isNaN(result.id)) {
-          return throwError(() => new Error('ID de producto inválido'));
-        }
-        return this.productosService.updateProducto(result).pipe(
+        // Forzar ID de categoría original
+        const safeProducto = {
+          ...result,
+          categoria: { id: producto.categoria.id }
+        };
+        
+        return this.productosService.updateProducto(safeProducto).pipe(
           switchMap(updatedProducto => {
             if (!result.imageFile) return of(updatedProducto);
             return this.productosService.uploadImage(
-              Number(updatedProducto.id),
+              updatedProducto.id,
               result.imageFile
-            ).pipe(
-              map(() => updatedProducto)
-            );
+            ).pipe(map(() => updatedProducto));
           })
         );
       })
@@ -106,33 +123,52 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  private handleLoadError(err: HttpErrorResponse): void {
-    this.errorMessage = this.getErrorMessage(err);
-    console.error('[ProductosComponent] Error:', err);
+  private retryUpdate(): void {
+    if (!this.lastOperation?.product) return;
+
+    this.productosService.updateProducto(this.lastOperation.product).subscribe({
+      next: (updatedProducto) => this.handleUpdateSuccess(updatedProducto),
+      error: (err) => this.handleUpdateError(err)
+    });
+  }
+
+  private retryUpload(): void {
+    if (!this.lastOperation?.product?.id || !this.lastOperation?.file) return;
+
+    this.productosService.uploadImage(
+      this.lastOperation.product.id,
+      this.lastOperation.file
+    ).subscribe({
+      next: (updatedProducto) => this.handleUpdateSuccess(updatedProducto),
+      error: (err) => this.handleUpdateError(err)
+    });
   }
 
   private handleUpdateSuccess(updatedProducto: Producto): void {
-    this.productos = this.productos.map(p => {
-      if (p.id === updatedProducto.id) {
-        return {
-          ...updatedProducto,
-          imgUrl: updatedProducto.imgUrl || p.imgUrl
-        };
-      }
-      return p;
-    });
+    // Actualizar solo el producto modificado
+    this.productos = this.productos.map(p => 
+      p.id === updatedProducto.id ? updatedProducto : p
+    );
+    this.lastOperation = null; // Resetear operación
+    this.isLoading = false;
     this.errorMessage = null;
   }
 
   private handleUpdateError(err: Error | HttpErrorResponse): void {
+    this.isLoading = false;
     const message = err instanceof HttpErrorResponse 
       ? this.getErrorMessage(err)
       : err.message;
     
     this.errorMessage = message;
-    console.error('Error actualizando producto:', err);
+    console.error('Error en operación:', this.lastOperation?.type, err);
     
     setTimeout(() => this.errorMessage = null, 5000);
+  }
+
+  private handleLoadError(err: HttpErrorResponse): void {
+    this.errorMessage = this.getErrorMessage(err);
+    console.error('[ProductosComponent] Error:', err);
   }
 
   private getErrorMessage(err: HttpErrorResponse): string {
