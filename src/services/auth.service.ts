@@ -3,8 +3,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { LoginRequest } from '../model/LoginRequest';
-import { SignupRequest } from '../model/SignupRequest';
+import { LoginRequest } from '../payloads/LoginRequest';
+import { SignupRequest } from '../payloads/SignupRequest';
 
 interface AuthResponse {
   status: string;

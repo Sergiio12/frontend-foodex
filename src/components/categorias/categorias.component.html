@@ -27,7 +27,7 @@
                  [alt]="categoria.nombre" 
                  class="categoria-image"
                  [class.image-zoom]="hoverState === categoria.id"
-                 loading="lazy">
+                 loading="eager">
             <div class="image-overlay"></div>
             
             <button *ngIf="hasAdminRole()" class="edit-button" (click)="editCategoria(categoria)">

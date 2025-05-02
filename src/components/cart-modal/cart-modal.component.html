@@ -1,0 +1,82 @@
+<!-- cart-modal.component.html -->
+<div class="cart-modal-overlay" (click)="onBackgroundClick($event)">
+    <div class="cart-modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Tu Carrito</h2>
+        <button class="close-btn" (click)="close()" aria-label="Cerrar modal">
+          &times;
+        </button>
+      </div>
+  
+      <div class="cart-body">
+        <ng-container *ngIf="cartService.isLoading$ | async; else content">
+          <div class="loading">Cargando...</div>
+        </ng-container>
+  
+        <ng-template #content>
+          <ng-container *ngIf="(cartItems$ | async)?.length as itemsCount; else emptyCart">
+            <!-- Contenedor scrollable -->
+            <div class="scrollable-products">
+              <div class="cart-items">
+                <div *ngFor="let item of cartItems$ | async; trackBy: trackByProductId" 
+                     class="cart-item">
+                  <img [src]="getProductImage(item)" 
+                       [alt]="item.producto.nombre"
+                       class="product-image"
+                       (error)="handleImageError($event)">
+                  
+                  <div class="item-info">
+                    <h3 class="product-name">{{ item.producto.nombre }}</h3>
+                    <p class="product-price">{{ item.producto.precio | currency:'EUR':'symbol':'1.2-2' }}</p>
+                    
+                    <div class="quantity-controls">
+                      <button (click)="updateQuantity(item.producto.id, item.cantidad - 1)"
+                              [disabled]="item.cantidad <= 1">-</button>
+                      <span class="quantity">{{ item.cantidad }}</span>
+                      <button (click)="updateQuantity(item.producto.id, item.cantidad + 1)">+</button>
+                    </div>
+                    
+                    <p class="item-total">
+                      {{ item.producto.precio * item.cantidad | currency:'EUR':'symbol':'1.2-2' }}
+                    </p>
+                  </div>
+                  
+                  <button class="remove-btn" 
+                          (click)="removeItem(item.producto.id)"
+                          aria-label="Eliminar producto">
+                    &times;
+                  </button>
+                </div>
+              </div>
+            </div>
+  
+            <!-- Resumen sticky -->
+            <div class="cart-summary">
+              <div class="total-section">
+                <span>Total:</span>
+                <span class="total-price">{{ totalPrice$ | async | currency:'EUR':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <div class="action-buttons">
+                <button class="btn continue-shopping" (click)="close()">
+                  Seguir comprando
+                </button>
+                <button class="btn checkout" (click)="navigateToCheckout()">
+                  Finalizar compra
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </ng-template>
+  
+        <ng-template #emptyCart>
+          <div class="empty-cart-message">
+            <p>Tu carrito está vacío</p>
+            <button class="btn continue-shopping" (click)="close()">
+              Ver catálogo
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>

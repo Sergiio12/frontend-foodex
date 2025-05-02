@@ -1,130 +1,163 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError, tap, catchError, take } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, tap, catchError, finalize, map, distinctUntilChanged, shareReplay } from 'rxjs';
 import { AuthService } from './auth.service';
+import { UpdateCartRequest } from '../payloads/UpdateCartRequest';
+import { ApiResponseBody } from '../model/ApiResponseBody';
+import { CarritoResponse } from '../payloads/CarritoResponse';
+import { ItemCarrito } from '../model/ItemCarrito';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private apiUrl = 'http://localhost:8080/api/carrito';
-  private cartItemsCount = new BehaviorSubject<number>(0);
-  private loading = new BehaviorSubject<boolean>(false);
+  private readonly API_URL = 'http://localhost:8080/api/carrito';
+  
+  // Corregir el tipo del BehaviorSubject
+  private cartSubject = new BehaviorSubject<ApiResponseBody<CarritoResponse> | null>(null);
+  private loadingSubject = new BehaviorSubject<boolean>(false);
+
+  // Actualizar los observables públicos
+  public cart$ = this.cartSubject.asObservable().pipe(shareReplay(1));
+  public isLoading$ = this.loadingSubject.asObservable();
+  
+  public totalPrice$ = this.cart$.pipe(
+    map(response => {
+      if (!response?.data?.itemsCarrito) return 0;
+      return response.data.itemsCarrito.reduce((total, item) => {
+        return total + (item.producto.precio * item.cantidad);
+      }, 0);
+    }),
+    distinctUntilChanged()
+  );
+
+  // Contador corregido
+  public uniqueItemsCount$ = this.cart$.pipe(
+    map(response => response?.data?.itemsCarrito?.length || 0),
+    distinctUntilChanged()
+  );
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) {}
 
-  getCartItemsCount(): Observable<number> {
-    return this.cartItemsCount.asObservable();
+  // --- Métodos principales ---
+  getCart(): Observable<ApiResponseBody<CarritoResponse>> {
+    this.setLoading(true);
+    return this.http.get<ApiResponseBody<CarritoResponse>>(this.API_URL, { 
+      headers: this.authHeaders 
+    }).pipe(
+      tap(response => {
+        if (response.status === 'success') {
+          this.cartSubject.next(response); // Enviar toda la respuesta
+        }
+      }),
+      catchError(error => this.handleError(error)),
+      finalize(() => this.setLoading(false))
+    );
   }
 
-  private getAuthHeaders(): HttpHeaders {
+  updateItem(request: UpdateCartRequest): Observable<ApiResponseBody<CarritoResponse>> {
+    this.setLoading(true);
+    return this.http.put<ApiResponseBody<CarritoResponse>>(
+      `${this.API_URL}/añadir`,
+      request,
+      { headers: this.authHeaders }
+    ).pipe(
+      tap(response => this.handleCartResponse(response)),
+      catchError(error => this.handleError(error)),
+      finalize(() => this.setLoading(false))
+    );
+  }
+
+  removeItem(productId: number): Observable<ApiResponseBody<CarritoResponse>> {
+    this.setLoading(true);
+    return this.http.delete<ApiResponseBody<CarritoResponse>>(
+      `${this.API_URL}/eliminar`,
+      { 
+        headers: this.authHeaders,
+        body: { productoId: productId }
+      }
+    ).pipe(
+      tap(response => this.handleCartResponse(response)),
+      catchError(error => this.handleError(error)),
+      finalize(() => this.setLoading(false))
+    );
+  }
+
+  clearCart(): Observable<ApiResponseBody<void>> {
+    this.setLoading(true);
+    return this.http.delete<ApiResponseBody<void>>(
+      `${this.API_URL}/vaciar`,
+      { headers: this.authHeaders }
+    ).pipe(
+      tap(() => this.cartSubject.next(null)),
+      catchError(error => this.handleError(error)),
+      finalize(() => this.setLoading(false))
+    );
+  }
+
+  get currentTotal(): number {
+    const response = this.cartSubject.value;
+    if (!response?.data?.itemsCarrito) return 0;
+    return response.data.itemsCarrito.reduce((total, item) => {
+      return total + (item.producto.precio * item.cantidad);
+    }, 0);
+  }
+
+  // --- Helpers ---
+  private get authHeaders(): HttpHeaders {
     const token = this.authService.getToken();
-    // Asegurar que el token no sea null o undefined
-    if (!token) {
-      console.error('No se encontró el token JWT');
-      this.authService.logout(); // Cerrar sesión si el token no está presente
-      return new HttpHeaders();
+    if (!token) throw new Error('Usuario no autenticado');
+    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+  }
+
+  private handleCartResponse(response: ApiResponseBody<CarritoResponse>): void {
+    if (response.status === 'success') {
+      const validatedCart = this.validateCartItems(response);
+      this.cartSubject.next(validatedCart);
     }
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
   }
 
-  private handleAuthError(error: any): Observable<never> {
-    if (error.status === 401) {
-      this.authService.logout();
-    }
-    return throwError(() => error);
-  }
-
-  getCart(): Observable<any> {
-    this.loading.next(true);
-    return this.http.get<any>(this.apiUrl, { headers: this.getAuthHeaders() }).pipe(
-      tap({
-        next: (response) => {
-          let totalItems = 0;
-          
-          // Compatibilidad con diferentes estructuras de respuesta
-          if (response?.data?.itemsCarrito) { // Estructura 1
-            totalItems = response.data.itemsCarrito.reduce((acc: number, item: any) => acc + item.cantidad, 0);
-          } else if (response?.items) { // Estructura 2
-            totalItems = response.items.reduce((acc: number, item: any) => acc + item.quantity, 0);
-          } else if (Array.isArray(response)) { // Estructura 3
-            totalItems = response.reduce((acc: number, item: any) => acc + item.quantity, 0);
-          }
-          
-          this.cartItemsCount.next(totalItems);
-          this.loading.next(false);
-        },
-        error: () => this.loading.next(false)
-      }),
-      catchError(error => this.handleAuthError(error))
+  private validateCartItems(response: ApiResponseBody<CarritoResponse>): ApiResponseBody<CarritoResponse> {
+    if (!response.data?.itemsCarrito) return response;
+    
+    const validItems = response.data.itemsCarrito.filter(item => 
+      item?.producto?.id && 
+      item?.cantidad > 0 &&
+      item?.producto?.precio > 0
     );
+    
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        itemsCarrito: validItems
+      }
+    };
   }
 
-  addToCart(productId: number, cantidad: number): Observable<any> {
-    this.loading.next(true);
-    return this.http.put(
-      `${this.apiUrl}/añadir?idProducto=${productId}&cantidad=${cantidad}`,
-      {},
-      { headers: this.getAuthHeaders() }
-    ).pipe(
-      tap(() => {
-        // Actualización optimizada
-        const currentCount = this.cartItemsCount.value;
-        this.cartItemsCount.next(currentCount + cantidad);
-        this.refreshCart(); // Sincronización con backend
-      }),
-      catchError(error => this.handleAuthError(error))
-    );
+  private setLoading(isLoading: boolean): void {
+    this.loadingSubject.next(isLoading);
   }
-
-  removeFromCart(productId: number, cantidad: number): Observable<any> {
-    this.loading.next(true);
-    return this.http.delete(
-      `${this.apiUrl}/eliminar?idProducto=${productId}&cantidad=${cantidad}`,
-      { headers: this.getAuthHeaders() }
-    ).pipe(
-      tap(() => {
-        // Actualización optimizada
-        const currentCount = this.cartItemsCount.value;
-        this.cartItemsCount.next(Math.max(currentCount - cantidad, 0));
-        this.refreshCart(); // Sincronización con backend
-      }),
-      catchError(error => this.handleAuthError(error))
-    );
-  }
-
-  clearCart(): Observable<any> {
-    this.loading.next(true);
-    return this.http.delete(
-      `${this.apiUrl}/vaciar`,
-      { headers: this.getAuthHeaders() }
-    ).pipe(
-      tap(() => {
-        this.cartItemsCount.next(0);
-        this.loading.next(false);
-      }),
-      catchError(error => {
-        this.handleAuthError(error);
-        return this.handleError(error);
-      })
-    );
-  }
-
-  // ... Los demás métodos permanecen igual ...
 
   private handleError(error: any): Observable<never> {
-    this.loading.next(false);
-    const errorMessage = error.error?.message || error.message || 'Unknown error';
+    this.setLoading(false);
+    
+    const errorMessage = error.error?.message || 
+                        error.message || 
+                        'Error desconocido en el carrito';
+    
+    if (error.status === 401) {
+      this.authService.logout();
+      return throwError(() => new Error('Sesión expirada. Redirigiendo...'));
+    }
+
+    console.error('Error del carrito:', {
+      error,
+      message: errorMessage,
+      timestamp: new Date().toISOString()
+    });
+    
     return throwError(() => new Error(errorMessage));
   }
-
-  private refreshCart(): void {
-    this.getCart().pipe(take(1)).subscribe({
-      error: (err) => console.error('Error refreshing cart:', err)
-    });
-  }
-
 }

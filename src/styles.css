@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden auto; /* Oculta el scroll horizontal, mantiene el vertical */
+  overflow: hidden auto; 
   font-family: 'Inter', sans-serif;
   scroll-behavior: smooth;
 }
@@ -12,5 +12,5 @@ body {
   color: #f8fafc;
   display: flex;
   flex-direction: column;
-  padding-top: 80px; /* Espacio para el header fijo */
+  padding-top: 80px; 
 }
