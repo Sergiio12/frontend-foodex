@@ -14,7 +14,19 @@ export class CartService {
   cartSubject = new BehaviorSubject<ApiResponseBody<CarritoResponse> | null>(null);
   private loadingSubject = new BehaviorSubject<boolean>(false);
 
-  public cart$ = this.cartSubject.asObservable().pipe(shareReplay(1));
+  // Versión corregida en cart.service.ts:
+  public cart$ = this.cartSubject.asObservable().pipe(
+    map(res => res ? { 
+      status: res.status,
+      data: {
+        itemsCarrito: res.data?.itemsCarrito || [],
+        total: res.data?.total || 0 
+      }
+    } : null),
+    distinctUntilChanged((prev, curr) => isEqual(prev?.data.itemsCarrito, curr?.data.itemsCarrito)),
+    shareReplay(1)
+  );
+
   public isLoading$ = this.loadingSubject.asObservable();
 
   public totalPrice$ = this.cart$.pipe(

@@ -23,14 +23,9 @@ export class CartModalComponent implements OnInit, OnDestroy {
   defaultImage = 'assets/default-product.png';
   private destroy$ = new Subject<void>();
 
-  // Observables
-  cartItems$!: Observable<ItemCarrito[]>;
-  totalPrice$!: Observable<number>;
-  uniqueItemsCount$!: Observable<number>;
-  combinedData$!: Observable<{ // Declaración corregida
+  combinedData$!: Observable<{
     cart: ApiResponseBody<CarritoResponse> | null;
     loading: boolean;
-    total: number;
   }>;
 
   constructor(
@@ -43,25 +38,19 @@ export class CartModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeCart();
-    this.setupCartObservables();
-    this.initializeCombinedData(); 
+    this.initializeCombinedData();
   }
 
   private initializeCombinedData(): void {
     this.combinedData$ = combineLatest({
-      cart: this.cartService.cart$,
-      loading: this.cartService.isLoading$,
-      total: this.cartService.totalPrice$
+      cart: this.cartService.cart$.pipe(
+        distinctUntilChanged((prev, curr) => isEqual(prev?.data.itemsCarrito, curr?.data.itemsCarrito))
+      ),
+      loading: this.cartService.isLoading$.pipe(
+        distinctUntilChanged()
+      )
     }).pipe(
-      tap(data => console.log('[CartModal] Actualización combinedData:', data.cart?.data?.itemsCarrito)),
-      distinctUntilChanged((prev, curr) => {
-        // Corregir nombre de variable para evitar conflicto con la función isEqual
-        const areEqual = prev.loading === curr.loading &&
-          isEqual(prev.cart?.data?.itemsCarrito, curr.cart?.data?.itemsCarrito);
-        
-        console.log('[CartModal] ¿Datos iguales?:', areEqual);
-        return areEqual;
-      })
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
 
@@ -75,40 +64,24 @@ export class CartModalComponent implements OnInit, OnDestroy {
     ).subscribe();
   }
 
-  private setupCartObservables(): void {
-    this.cartItems$ = this.cartService.cart$.pipe(
-      map(response => response?.data?.itemsCarrito || []),
-      distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-      shareReplay(1)
-    );
-  }
-
   updateQuantity(productId: number, newQuantity: number): void {
-    console.log('[CartModal] Actualizando cantidad. Producto:', productId, 'Nueva cantidad:', newQuantity);
-    
-    if (newQuantity < 0) return;
-  
-    console.log('[CartModal] Bloqueando UI...');
+    if (newQuantity < 0 || newQuantity === this.getCurrentQuantity(productId)) return;
+
     this.cartService.setLoading(true);
     
     this.cartService.modifyItem(productId, newQuantity).pipe(
-      tap(() => console.log('[CartModal] Actualización exitosa')),
-      catchError(error => {
-        console.error('[CartModal] Error en actualización:', error);
-        console.log('[CartModal] Forzando recarga del carrito...');
-        this.cartService.getCart().pipe(take(1)).subscribe();
-        return throwError(() => error);
-      }),
-      finalize(() => {
-        console.log('[CartModal] Finalizando actualización');
-        this.cartService.setLoading(false);
-      })
+      takeUntil(this.destroy$),
+      finalize(() => this.cartService.setLoading(false))
     ).subscribe();
+  }
+
+  private getCurrentQuantity(productId: number): number {
+    const currentCart = this.cartService.cartSubject.value?.data?.itemsCarrito;
+    return currentCart?.find(i => i.producto.id === productId)?.cantidad || 0;
   }
 
   getProductImage(item: ItemCarrito): string {
     if (!item?.producto?.imgUrl) return this.defaultImage;
-
     try {
       return this.productosService.buildImageUrl(
         item.producto.imgUrl,
@@ -129,22 +102,13 @@ export class CartModalComponent implements OnInit, OnDestroy {
   }
 
   removeItem(productId: number): void {
-    console.log('[CartModal] Iniciando eliminación de producto:', productId);
-    
     this.cartService.removeItem(productId).pipe(
-      tap(() => console.log('[CartModal] Eliminación HTTP completada')),
-      catchError(error => {
-        console.error('[CartModal] Error en eliminación:', error);
-        return throwError(() => error);
-      }),
-      finalize(() => console.log('[CartModal] Proceso de eliminación finalizado')),
       takeUntil(this.destroy$)
     ).subscribe();
   }
 
   trackByProductId(index: number, item: ItemCarrito): number {
-    console.log('[CartModal] TrackBy ID:', item.producto.id);
-    return item.producto.id;
+    return item.producto.id + item.cantidad; // Incluir cantidad para cambios específicos
   }
 
   close(): void {
@@ -153,11 +117,10 @@ export class CartModalComponent implements OnInit, OnDestroy {
 
   navigateToCheckout(): void {
     this.close();
-    
     this.cartService.cart$.pipe(
       take(1),
-      map(response => response?.data),
-      filter(Boolean)
+      filter(res => !!res?.data),
+      map(res => res!.data)
     ).subscribe(cartData => {
       this.router.navigate(['/checkout'], {
         state: { 
