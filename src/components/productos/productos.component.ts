@@ -6,11 +6,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { EditProductoModalComponent } from '../edit-producto-modal/edit-producto-modal.component';
-import { finalize, switchMap, filter, map } from 'rxjs/operators';
+import { switchMap, filter, map } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
+import { EditProductoResult } from '../../payloads/EditProductResult';
 
 @Component({
   selector: 'app-productos',
@@ -87,37 +88,34 @@ export class ProductosComponent implements OnInit {
     return this.authService.hasRole('ROLE_ADMIN');
   }
 
+  // productos.component.ts
   editProducto(producto: Producto): void {
     const dialogRef = this.dialog.open(EditProductoModalComponent, {
       width: '600px',
       data: { 
         producto: { 
           ...producto,
-          categoria: { ...producto.categoria } // Clonar categoría
+          categoria: { ...producto.categoria }
         } 
       }
     });
-  
+
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
-      switchMap(result => {
-        // Forzar ID de categoría original
-        const safeProducto = {
-          ...result,
-          categoria: { id: producto.categoria.id }
-        };
+      switchMap((result: Producto & { imageFile?: File }) => {
+        const { imageFile, ...productoToUpdate } = result;
         
-        return this.productosService.updateProducto(safeProducto).pipe(
+        return this.productosService.updateProducto(productoToUpdate).pipe(
           switchMap(updatedProducto => {
-            if (!result.imageFile) return of(updatedProducto);
+            if (!imageFile) return of(updatedProducto);
             return this.productosService.uploadImage(
               updatedProducto.id,
-              result.imageFile
-            ).pipe(map(() => updatedProducto));
+              imageFile
+            );
           })
         );
       })
-    ).subscribe({
+    ).subscribe({ 
       next: (finalProducto) => this.handleUpdateSuccess(finalProducto),
       error: (err) => this.handleUpdateError(err)
     });
@@ -144,14 +142,13 @@ export class ProductosComponent implements OnInit {
     });
   }
 
+  // productos.component.ts
   private handleUpdateSuccess(updatedProducto: Producto): void {
-    // Actualizar solo el producto modificado
-    this.productos = this.productos.map(p => 
-      p.id === updatedProducto.id ? updatedProducto : p
-    );
-    this.lastOperation = null; // Resetear operación
-    this.isLoading = false;
-    this.errorMessage = null;
+    this.productosService.getProducto(updatedProducto.id).subscribe(freshProduct => {
+        this.productos = this.productos.map(p => 
+            p.id === freshProduct.id ? freshProduct : p
+        );
+    });
   }
 
   private handleUpdateError(err: Error | HttpErrorResponse): void {

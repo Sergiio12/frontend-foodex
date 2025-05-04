@@ -19,40 +19,29 @@ export class ProductosService {
     private authService: AuthService
   ) {}
 
+  // productos.service.ts
   updateProducto(producto: Producto): Observable<Producto> {
-    // Crear payload seguro sin modificar categoría
-    const safeProducto: Producto = {
+    const payload = {
       ...producto,
-      categoria: {
-        id: producto.categoria.id, // Mantener solo el ID original
-        nombre: '', // Campos dummy no utilizados
-        descripcion: '',
-        imgUrl: '',
-        imgOrigen: ImagenOrigen.STATIC
-      }
+      categoria: { id: producto.categoria.id },
+      // Mantener los campos de imagen si existen
+      imgUrl: producto.imgUrl,
+      imgOrigen: producto.imgOrigen
     };
-  
+
     return this.http.put<ApiResponseBody<Producto>>(
-      `${this.apiUrl}`,
-      safeProducto,
+      `${this.apiUrl}/${producto.id}`,
+      payload,
       { headers: this.createHeaders() }
     ).pipe(
       map(response => ({
         ...response.data,
-        categoria: producto.categoria // Mantener categoría original en front
-      })),
-      catchError(this.handleError)
+        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
+      }))
     );
   }
 
   uploadImage(id: number, file: File): Observable<Producto> {
-    if (!id || isNaN(id)) {
-      return throwError(() => new Error('ID de producto inválido'));
-    }
-    if (!file) {
-      return throwError(() => new Error('Archivo no seleccionado'));
-    }
-
     const formData = new FormData();
     formData.append('file', file, file.name);
 
@@ -63,9 +52,10 @@ export class ProductosService {
     ).pipe(
       map(response => ({
         ...response.data,
-        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
-      })),
-      catchError(this.handleError)
+        // Forzar el origen a UPLOAD y reconstruir URL
+        imgOrigen: ImagenOrigen.UPLOAD,
+        imgUrl: this.buildImageUrl(response.data.imgUrl, ImagenOrigen.UPLOAD)
+      }))
     );
   }
 
@@ -106,8 +96,9 @@ export class ProductosService {
   }
 
   getProducto(id: number): Observable<Producto> {
+    // Corregir URL para usar path parameter
     return this.http.get<ApiResponseBody<Producto>>(
-      `${this.apiUrl}?id=${id}`,
+      `${this.apiUrl}/${id}`,  // ✅ ID en la URL
       { headers: this.createHeaders() }
     ).pipe(
       map(response => ({

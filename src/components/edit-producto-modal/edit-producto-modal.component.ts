@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Producto } from '../../model/Producto';
 import { ImagenOrigen } from '../../model/ImagenOrigen';
+import { EditProductoResult } from '../../payloads/EditProductResult';
 
 @Component({
   selector: 'app-edit-producto-modal',
@@ -136,26 +137,44 @@ export class EditProductoModalComponent {
 
   saveChanges(): void {
     if (!this.hasChanges) {
-      this.errorMessage = 'No se detectaron cambios para guardar';
+      this.errorMessage = 'No hay cambios que guardar';
+      return;
+    }
+  
+    this.editForm.markAllAsTouched();
+    if (this.editForm.invalid) {
+      this.errorMessage = 'Complete los campos requeridos';
       return;
     }
   
     const formValue = this.editForm.value;
     
-    // Mantener categoría original sin cambios
-    const updatedProduct: Producto & { imageFile?: File } = {
-      ...this.data.producto, // Campos originales incluyendo categoría
+    const productoActualizado: Producto & { imageFile?: File } = {
+      ...this.data.producto,
       nombre: formValue.nombre.trim(),
       descripcion: formValue.descripcion.trim(),
-      precio: parseFloat(formValue.precio),
+      precio: this.sanitizePrice(formValue.precio),
       stock: Math.floor(formValue.stock),
       descatalogado: formValue.descatalogado,
-      imgUrl: this.selectedFile ? undefined : this.originalImageUrl,
+      categoria: {
+        id: this.data.producto.categoria.id,
+        nombre: this.data.producto.categoria.nombre,
+        descripcion: this.data.producto.categoria.descripcion
+      },
       ...(this.selectedFile && { imageFile: this.selectedFile })
     };
   
-    console.log('Producto a actualizar:', JSON.stringify(updatedProduct, null, 2));
-    this.dialogRef.close(updatedProduct);
+    this.dialogRef.close(productoActualizado);
+  }
+
+  private sanitizePrice(value: any): number {
+    return parseFloat(value.toString().replace(',', '.')) || 0;
+  }
+
+  private markAllAsTouched(): void {
+    Object.values(this.editForm.controls).forEach(control => {
+      control.markAsTouched();
+    });
   }
 
   cancel(): void {
