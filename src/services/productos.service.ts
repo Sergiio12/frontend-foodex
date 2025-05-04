@@ -133,8 +133,6 @@ export class ProductosService {
   }
 
   buildImageUrl(imgUrl?: string, imgOrigen?: ImagenOrigen): string {
-    console.log('[ProductosService] Construyendo URL de imagen:', { imgUrl, imgOrigen });
-    
     if (!imgUrl || !imgOrigen) {
       console.warn('[ProductosService] Imagen no disponible, usando placeholder');
       return 'assets/images/placeholder-product.jpg';

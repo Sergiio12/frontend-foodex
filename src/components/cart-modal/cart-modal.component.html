@@ -1,24 +1,29 @@
-<!-- cart-modal.component.html -->
+<!-- cart-modal.component.html (versión corregida) -->
 <div class="cart-modal-overlay" (click)="onBackgroundClick($event)">
-    <div class="cart-modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Tu Carrito</h2>
-        <button class="close-btn" (click)="close()" aria-label="Cerrar modal">
-          &times;
-        </button>
-      </div>
-  
-      <div class="cart-body">
-        <ng-container *ngIf="cartService.isLoading$ | async; else content">
+  <div class="cart-modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Tu Carrito</h2>
+      <button class="close-btn" (click)="close()" aria-label="Cerrar modal">
+        &times;
+      </button>
+    </div>
+
+    <div class="cart-body">
+      <ng-container *ngIf="{ 
+        cart: cartService.cart$ | async, 
+        loading: cartService.isLoading$ | async,
+        total: cartService.totalPrice$ | async
+      } as data">
+        
+        <ng-container *ngIf="data.loading; else content">
           <div class="loading">Cargando...</div>
         </ng-container>
-  
+
         <ng-template #content>
-          <ng-container *ngIf="(cartItems$ | async)?.length as itemsCount; else emptyCart">
-            <!-- Contenedor scrollable -->
+          <ng-container *ngIf="data.cart?.data?.itemsCarrito?.length; else emptyCart">
             <div class="scrollable-products">
               <div class="cart-items">
-                <div *ngFor="let item of cartItems$ | async; trackBy: trackByProductId" 
+                <div *ngFor="let item of data.cart?.data?.itemsCarrito; trackBy: trackByProductId" 
                      class="cart-item">
                   <img [src]="getProductImage(item)" 
                        [alt]="item.producto.nombre"
@@ -33,7 +38,8 @@
                       <button (click)="updateQuantity(item.producto.id, item.cantidad - 1)"
                               [disabled]="item.cantidad <= 1">-</button>
                       <span class="quantity">{{ item.cantidad }}</span>
-                      <button (click)="updateQuantity(item.producto.id, item.cantidad + 1)">+</button>
+                      <button (click)="updateQuantity(item.producto.id, item.cantidad + 1)"
+                              [disabled]="item.cantidad >= item.producto.stock">+</button>
                     </div>
                     
                     <p class="item-total">
@@ -44,31 +50,38 @@
                   <button class="remove-btn" 
                           (click)="removeItem(item.producto.id)"
                           aria-label="Eliminar producto">
-                    &times;
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      <path d="M10 11v6"/>
+                      <path d="M14 11v6"/>
+                    </svg>
                   </button>
                 </div>
               </div>
             </div>
-  
-            <!-- Resumen sticky -->
+
             <div class="cart-summary">
               <div class="total-section">
                 <span>Total:</span>
-                <span class="total-price">{{ totalPrice$ | async | currency:'EUR':'symbol':'1.2-2' }}</span>
+                <span class="total-price">
+                  {{ (data.total || 0) | currency:'EUR':'symbol':'1.2-2' }}
+                </span>
               </div>
               
               <div class="action-buttons">
                 <button class="btn continue-shopping" (click)="close()">
                   Seguir comprando
                 </button>
-                <button class="btn checkout" (click)="navigateToCheckout()">
+                <button class="btn checkout" 
+                        (click)="navigateToCheckout()"
+                        [disabled]="!data.cart?.data?.itemsCarrito?.length">
                   Finalizar compra
                 </button>
               </div>
             </div>
           </ng-container>
         </ng-template>
-  
+
         <ng-template #emptyCart>
           <div class="empty-cart-message">
             <p>Tu carrito está vacío</p>
@@ -77,6 +90,7 @@
             </button>
           </div>
         </ng-template>
-      </div>
+      </ng-container>
     </div>
   </div>
+</div>
