@@ -9,8 +9,8 @@ import { isEqual } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  cartSubject = new BehaviorSubject<ApiResponseBody<CarritoResponse> | null>(null);
   private readonly API_URL = 'http://localhost:8080/api/carrito';
-  private cartSubject = new BehaviorSubject<ApiResponseBody<CarritoResponse> | null>(null);
   private loadingSubject = new BehaviorSubject<boolean>(false);
 
   cart$ = this.cartSubject.asObservable().pipe(
