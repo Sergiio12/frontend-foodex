@@ -20,13 +20,14 @@ import { CarritoResponse } from '../../payloads/CarritoResponse';
 })
 export class CartModalComponent implements OnInit, OnDestroy {
   @Output() closeModal = new EventEmitter<void>();
-  defaultImage = 'assets/default-product.png';
-  private destroy$ = new Subject<void>();
 
+  defaultImage = 'assets/default-product.png';
   combinedData$!: Observable<{
     cart: ApiResponseBody<CarritoResponse> | null;
     loading: boolean;
   }>;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     public cartService: CartService,
@@ -41,27 +42,9 @@ export class CartModalComponent implements OnInit, OnDestroy {
     this.initializeCombinedData();
   }
 
-  private initializeCombinedData(): void {
-    this.combinedData$ = combineLatest({
-      cart: this.cartService.cart$.pipe(
-        distinctUntilChanged((prev, curr) => isEqual(prev?.data.itemsCarrito, curr?.data.itemsCarrito))
-      ),
-      loading: this.cartService.isLoading$.pipe(
-        distinctUntilChanged()
-      )
-    }).pipe(
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-  }
-
-  private initializeCart(): void {
-    this.cartService.getCart().pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error inicializando carrito:', error);
-        return throwError(() => new Error('No se pudo cargar el carrito.'));
-      })
-    ).subscribe();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   updateQuantity(productId: number, newQuantity: number): void {
@@ -73,11 +56,6 @@ export class CartModalComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$),
       finalize(() => this.cartService.setLoading(false))
     ).subscribe();
-  }
-
-  private getCurrentQuantity(productId: number): number {
-    const currentCart = this.cartService.cartSubject.value?.data?.itemsCarrito;
-    return currentCart?.find(i => i.producto.id === productId)?.cantidad || 0;
   }
 
   getProductImage(item: ItemCarrito): string {
@@ -108,7 +86,7 @@ export class CartModalComponent implements OnInit, OnDestroy {
   }
 
   trackByProductId(index: number, item: ItemCarrito): number {
-    return item.producto.id + item.cantidad; // Incluir cantidad para cambios específicos
+    return item.producto.id + item.cantidad;
   }
 
   close(): void {
@@ -142,8 +120,31 @@ export class CartModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private initializeCombinedData(): void {
+    this.combinedData$ = combineLatest({
+      cart: this.cartService.cart$.pipe(
+        distinctUntilChanged((prev, curr) => isEqual(prev?.data.itemsCarrito, curr?.data.itemsCarrito))
+      ),
+      loading: this.cartService.isLoading$.pipe(
+        distinctUntilChanged()
+      )
+    }).pipe(
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+  }
+
+  private initializeCart(): void {
+    this.cartService.getCart().pipe(
+      takeUntil(this.destroy$),
+      catchError(error => {
+        console.error('Error inicializando carrito:', error);
+        return throwError(() => new Error('No se pudo cargar el carrito.'));
+      })
+    ).subscribe();
+  }
+
+  private getCurrentQuantity(productId: number): number {
+    const currentCart = this.cartService.cartSubject.value?.data?.itemsCarrito;
+    return currentCart?.find(i => i.producto.id === productId)?.cantidad || 0;
   }
 }

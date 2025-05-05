@@ -28,8 +28,8 @@ export class EditCategoriaModalComponent {
     @Inject(MAT_DIALOG_DATA) public data: { categoria: Categoria },
     private fb: FormBuilder
   ) {
-    this.originalName     = data.categoria.nombre.trim();
-    this.originalDesc     = data.categoria.descripcion.trim();
+    this.originalName = data.categoria.nombre.trim();
+    this.originalDesc = data.categoria.descripcion.trim();
     this.originalImageUrl = data.categoria.imgUrl;
 
     this.editForm = this.fb.group({
@@ -46,17 +46,13 @@ export class EditCategoriaModalComponent {
     this.previewUrl = this.originalImageUrl;
   }
 
-  /**  
-   * true si nombre, descripción o fichero difieren del original  
-   * (ambos campos comparados con trim() para ignorar espacios)  
-   */
   get hasChanges(): boolean {
     const nombreActual = (this.editForm.get('nombre')?.value || '').trim();
-    const descActual   = (this.editForm.get('descripcion')?.value || '').trim();
+    const descActual = (this.editForm.get('descripcion')?.value || '').trim();
 
-    const nameChanged  = nombreActual !== this.originalName;
-    const descChanged  = descActual   !== this.originalDesc;
-    const fileChanged  = this.selectedFile != null;
+    const nameChanged = nombreActual !== this.originalName;
+    const descChanged = descActual !== this.originalDesc;
+    const fileChanged = this.selectedFile != null;
 
     return nameChanged || descChanged || fileChanged;
   }
@@ -106,10 +102,8 @@ export class EditCategoriaModalComponent {
     }
 
     const nombreFinal = (this.editForm.get('nombre')?.value || '').trim();
-    const descFinal   = (this.editForm.get('descripcion')?.value || '').trim();
+    const descFinal = (this.editForm.get('descripcion')?.value || '').trim();
 
-    // Si hay fichero nuevo, el backend gestionará la subida y la URL;
-    // si no, mantenemos la URL original
     const finalImageUrl = this.selectedFile ? undefined : this.originalImageUrl;
 
     const categoriaActualizada: Categoria & { imageFile?: File } = {
@@ -130,7 +124,7 @@ export class EditCategoriaModalComponent {
   getError(controlName: string): string | null {
     const control = this.editForm.get(controlName);
     if (!control || !control.touched || !control.errors) return null;
-    if (control.hasError('required'))  return 'Este campo es requerido';
+    if (control.hasError('required')) return 'Este campo es requerido';
     if (control.hasError('minlength')) return `Mínimo ${control.errors!['minlength'].requiredLength} caracteres`;
     if (control.hasError('maxlength')) return `Máximo ${control.errors!['maxlength'].requiredLength} caracteres`;
     return null;

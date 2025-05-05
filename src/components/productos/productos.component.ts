@@ -11,7 +11,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
-import { EditProductoResult } from '../../payloads/EditProductResult';
 
 @Component({
   selector: 'app-productos',
@@ -75,7 +74,7 @@ export class ProductosComponent implements OnInit {
         this.retryUpload();
       }
     } else {
-      this.loadProductos(); // Fallback si no hay última operación registrada
+      this.loadProductos();
     }
   }
 
@@ -88,7 +87,6 @@ export class ProductosComponent implements OnInit {
     return this.authService.hasRole('ROLE_ADMIN');
   }
 
-  // productos.component.ts
   editProducto(producto: Producto): void {
     const dialogRef = this.dialog.open(EditProductoModalComponent, {
       width: '600px',
@@ -142,7 +140,6 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  // productos.component.ts
   private handleUpdateSuccess(updatedProducto: Producto): void {
     this.productosService.getProducto(updatedProducto.id).subscribe(freshProduct => {
         this.productos = this.productos.map(p => 

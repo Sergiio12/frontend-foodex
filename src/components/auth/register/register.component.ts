@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { catchError, finalize, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -20,17 +20,17 @@ import { catchError, finalize, lastValueFrom } from 'rxjs';
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnDestroy {
+  faSpinner = faSpinner;
+  faEye = faEye;
+  faEyeSlash = faEyeSlash;
+
   registerForm: FormGroup;
   loading = false;
   showPassword = false;
   showConfirmPassword = false;
   notification: { type: 'success' | 'error'; message: string } | null = null;
-  private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  // Iconos
-  faSpinner = faSpinner;
-  faEye = faEye;
-  faEyeSlash = faEyeSlash;
+  private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private fb: FormBuilder,

@@ -7,17 +7,33 @@ import { AuthService } from './auth.service';
 import { ApiResponseBody } from '../model/ApiResponseBody';
 import { ImagenOrigen } from '../model/ImagenOrigen';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class CategoriasService {
-  private apiUrl = 'http://localhost:8080/api/categorias';
-  private imagenBaseUrl = 'http://localhost:8080/api/images';
+  private readonly apiUrl = 'http://localhost:8080/api/categorias';
+  private readonly imagenBaseUrl = 'http://localhost:8080/api/images';
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) {}
+
+  getAll(): Observable<Categoria[]> {
+    return this.http.get<ApiResponseBody<Categoria[]>>(
+      this.apiUrl,
+      { headers: this.createHeaders() }
+    ).pipe(
+      map(response => {
+        if (response.status?.toUpperCase() === 'SUCCESS') {
+          return response.data.map(categoria => ({
+            ...categoria,
+            imgUrl: this.buildImageUrl(categoria.imgUrl, categoria.imgOrigen)
+          }));
+        }
+        throw new Error(response.message || 'Error al obtener categorías');
+      }),
+      catchError(this.handleError)
+    );
+  }
 
   updateCategoria(categoria: Categoria): Observable<Categoria> {
     return this.http.put<ApiResponseBody<Categoria>>(
@@ -56,24 +72,6 @@ export class CategoriasService {
         ...response.data,
         imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
       })),
-      catchError(this.handleError)
-    );
-  }
-
-  getAll(): Observable<Categoria[]> {
-    return this.http.get<ApiResponseBody<Categoria[]>>(
-      this.apiUrl,
-      { headers: this.createHeaders() }
-    ).pipe(
-      map(response => {
-        if (response.status?.toUpperCase() === 'SUCCESS') {
-          return response.data.map(categoria => ({
-            ...categoria,
-            imgUrl: this.buildImageUrl(categoria.imgUrl, categoria.imgOrigen)
-          }));
-        }
-        throw new Error(response.message || 'Error al obtener categorías');
-      }),
       catchError(this.handleError)
     );
   }

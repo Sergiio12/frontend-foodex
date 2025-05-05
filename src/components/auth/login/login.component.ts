@@ -20,17 +20,17 @@ import { lastValueFrom } from 'rxjs';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnDestroy {
-  loginForm: FormGroup;
-  loading = false;
-  showPassword = false;
-  notification: { type: 'success' | 'error'; message: string } | null = null;
-  private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
-
   faSpinner = faSpinner;
   faEye = faEye;
   faEyeSlash = faEyeSlash;
 
+  loginForm: FormGroup;
+  loading = false;
+  showPassword = false;
+  notification: { type: 'success' | 'error'; message: string } | null = null;
+
   private readonly TOKEN_KEY = 'authToken';
+  private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private fb: FormBuilder,

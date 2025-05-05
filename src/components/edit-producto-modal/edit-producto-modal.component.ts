@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Producto } from '../../model/Producto';
 import { ImagenOrigen } from '../../model/ImagenOrigen';
-import { EditProductoResult } from '../../payloads/EditProductResult';
 
 @Component({
   selector: 'app-edit-producto-modal',
@@ -27,7 +26,6 @@ export class EditProductoModalComponent {
   private originalStock: number;
   private originalDescatalogado: boolean;
   private originalImageUrl?: string;
-  private originalImgOrigen?: ImagenOrigen;
 
   constructor(
     public dialogRef: MatDialogRef<EditProductoModalComponent>,
@@ -35,16 +33,14 @@ export class EditProductoModalComponent {
     private fb: FormBuilder
   ) {
     console.log('[EditProductoModal] Producto recibido:', data.producto);
-    // Inicializar valores originales
+
     this.originalNombre = data.producto.nombre.trim();
     this.originalDesc = data.producto.descripcion.trim();
     this.originalPrecio = data.producto.precio;
     this.originalStock = data.producto.stock;
     this.originalDescatalogado = data.producto.descatalogado;
     this.originalImageUrl = data.producto.imgUrl;
-    this.originalImgOrigen = data.producto.imgOrigen;
 
-    // Inicializar formulario
     this.editForm = this.fb.group({
       nombre: [
         this.originalNombre,
@@ -107,7 +103,6 @@ export class EditProductoModalComponent {
     
     if (!file) return;
 
-    // Validar tipo y tamaño
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxSizeMB = 2;
     
@@ -121,7 +116,6 @@ export class EditProductoModalComponent {
       return;
     }
 
-    // Leer y mostrar preview
     this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = () => this.previewUrl = reader.result;

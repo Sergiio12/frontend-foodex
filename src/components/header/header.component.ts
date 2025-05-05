@@ -202,7 +202,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       autoFocus: false
     });
   
-    // Manejo opcional después de cerrar
     dialogRef.afterClosed().subscribe(result => {
       console.log('El modal se cerró con resultado:', result);
     });
