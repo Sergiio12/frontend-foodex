@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Producto } from '../../model/Producto';
-import { ImagenOrigen } from '../../model/ImagenOrigen';
 
 @Component({
   selector: 'app-edit-producto-modal',
@@ -16,116 +15,103 @@ import { ImagenOrigen } from '../../model/ImagenOrigen';
 export class EditProductoModalComponent {
   editForm: FormGroup;
   selectedFile: File | null = null;
-  previewUrl: string | ArrayBuffer | null = null;
+  previewUrl?: string | ArrayBuffer | null = null;
   errorMessage: string | null = null;
   isSubmitting = false;
 
-  private originalNombre: string;
-  private originalDesc: string;
-  private originalPrecio: number;
-  private originalStock: number;
-  private originalDescatalogado: boolean;
-  private originalImageUrl?: string;
+  private originalValores: {
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    stock: number;
+    descatalogado: boolean;
+    imgUrl?: string;
+  };
 
   constructor(
     public dialogRef: MatDialogRef<EditProductoModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { producto: Producto },
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {
-    console.log('[EditProductoModal] Producto recibido:', data.producto);
-
-    this.originalNombre = data.producto.nombre.trim();
-    this.originalDesc = data.producto.descripcion.trim();
-    this.originalPrecio = data.producto.precio;
-    this.originalStock = data.producto.stock;
-    this.originalDescatalogado = data.producto.descatalogado;
-    this.originalImageUrl = data.producto.imgUrl;
+    this.originalValores = {
+      nombre: data.producto.nombre.trim(),
+      descripcion: data.producto.descripcion.trim(),
+      precio: data.producto.precio,
+      stock: data.producto.stock,
+      descatalogado: data.producto.descatalogado,
+      imgUrl: data.producto.imgUrl
+    };
 
     this.editForm = this.fb.group({
       nombre: [
-        this.originalNombre,
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50)
-        ]
+        this.originalValores.nombre,
+        [Validators.required, Validators.minLength(3), Validators.maxLength(50)]
       ],
       descripcion: [
-        this.originalDesc,
-        [
-          Validators.required,
-          Validators.minLength(10),
-          Validators.maxLength(255)
-        ]
+        this.originalValores.descripcion,
+        [Validators.required, Validators.minLength(10), Validators.maxLength(255)]
       ],
       precio: [
-        this.originalPrecio,
-        [
-          Validators.required,
-          Validators.min(0.01),
-          Validators.max(10000)
-        ]
+        this.originalValores.precio,
+        [Validators.required, Validators.min(0.01), Validators.max(10000)]
       ],
       stock: [
-        this.originalStock,
-        [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(100000)
-        ]
+        this.originalValores.stock,
+        [Validators.required, Validators.min(0), Validators.max(100000)]
       ],
-      descatalogado: [this.originalDescatalogado]
+      descatalogado: [this.originalValores.descatalogado]
     });
 
-    // Configurar preview inicial
-    this.previewUrl = this.originalImageUrl || null;
+    this.previewUrl = this.originalValores.imgUrl;
   }
 
   get hasChanges(): boolean {
-    const currentValues = this.editForm.value;
-    const numericChanges = 
-      currentValues.precio !== this.originalPrecio ||
-      currentValues.stock !== this.originalStock;
-      
-    const stringChanges = 
-      currentValues.nombre.trim() !== this.originalNombre ||
-      currentValues.descripcion.trim() !== this.originalDesc;
+    const formValores = this.editForm.value;
+    
+    const cambiosTexto = 
+      formValores.nombre.trim() !== this.originalValores.nombre ||
+      formValores.descripcion.trim() !== this.originalValores.descripcion;
 
-    const statusChange = 
-      currentValues.descatalogado !== this.originalDescatalogado;
+    const cambiosNumericos = 
+      formValores.precio !== this.originalValores.precio ||
+      formValores.stock !== this.originalValores.stock;
 
-    return numericChanges || stringChanges || statusChange || !!this.selectedFile;
+    const cambiosEstado = 
+      formValores.descatalogado !== this.originalValores.descatalogado;
+
+    return cambiosTexto || cambiosNumericos || cambiosEstado || !!this.selectedFile;
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const maxSizeMB = 2;
-    
-    if (!validTypes.includes(file.type)) {
-      this.errorMessage = 'Solo se permiten imágenes JPEG, PNG o WEBP';
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxTamanoMB = 2;
+
+    if (!tiposPermitidos.includes(file.type)) {
+      this.errorMessage = 'Formato de imagen no válido (JPEG, PNG, WEBP)';
       return;
     }
 
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      this.errorMessage = `El tamaño máximo permitido es ${maxSizeMB}MB`;
+    if (file.size > maxTamanoMB * 1024 * 1024) {
+      this.errorMessage = `El tamaño máximo permitido es ${maxTamanoMB}MB`;
       return;
     }
 
     this.selectedFile = file;
     const reader = new FileReader();
-    reader.onload = () => this.previewUrl = reader.result;
+    reader.onload = () => {
+      this.previewUrl = reader.result;
+      this.errorMessage = null;
+    };
     reader.readAsDataURL(file);
-    this.errorMessage = null;
   }
 
   clearImage(): void {
     this.selectedFile = null;
-    this.previewUrl = this.originalImageUrl || null;
+    this.previewUrl = this.originalValores.imgUrl;
     this.errorMessage = null;
   }
 
@@ -134,41 +120,32 @@ export class EditProductoModalComponent {
       this.errorMessage = 'No hay cambios que guardar';
       return;
     }
-  
+
     this.editForm.markAllAsTouched();
     if (this.editForm.invalid) {
-      this.errorMessage = 'Complete los campos requeridos';
+      this.errorMessage = 'Complete los campos requeridos correctamente';
       return;
     }
-  
-    const formValue = this.editForm.value;
-    
+
+    const formValores = this.editForm.value;
+    const finalImageUrl = this.selectedFile ? undefined : this.originalValores.imgUrl;
+
     const productoActualizado: Producto & { imageFile?: File } = {
       ...this.data.producto,
-      nombre: formValue.nombre.trim(),
-      descripcion: formValue.descripcion.trim(),
-      precio: this.sanitizePrice(formValue.precio),
-      stock: Math.floor(formValue.stock),
-      descatalogado: formValue.descatalogado,
-      categoria: {
-        id: this.data.producto.categoria.id,
-        nombre: this.data.producto.categoria.nombre,
-        descripcion: this.data.producto.categoria.descripcion
-      },
+      nombre: formValores.nombre.trim(),
+      descripcion: formValores.descripcion.trim(),
+      precio: this.parsearPrecio(formValores.precio),
+      stock: Math.floor(formValores.stock),
+      descatalogado: formValores.descatalogado,
+      imgUrl: finalImageUrl,
       ...(this.selectedFile && { imageFile: this.selectedFile })
     };
-  
+
     this.dialogRef.close(productoActualizado);
   }
 
-  private sanitizePrice(value: any): number {
-    return parseFloat(value.toString().replace(',', '.')) || 0;
-  }
-
-  private markAllAsTouched(): void {
-    Object.values(this.editForm.controls).forEach(control => {
-      control.markAsTouched();
-    });
+  private parsearPrecio(valor: any): number {
+    return parseFloat(valor.toString().replace(',', '.')) || 0;
   }
 
   cancel(): void {
@@ -177,7 +154,6 @@ export class EditProductoModalComponent {
 
   getError(controlName: string): string | null {
     const control = this.editForm.get(controlName);
-    
     if (!control?.touched || !control.errors) return null;
 
     if (control.hasError('required')) return 'Campo obligatorio';
@@ -190,6 +166,6 @@ export class EditProductoModalComponent {
     if (control.hasError('max')) 
       return `Valor máximo: ${control.errors['max'].max}`;
 
-    return 'Error desconocido';
+    return null;
   }
 }

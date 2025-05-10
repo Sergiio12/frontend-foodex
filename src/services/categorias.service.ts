@@ -22,44 +22,60 @@ export class CategoriasService {
       this.apiUrl,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => {
-        if (response.status?.toUpperCase() === 'SUCCESS') {
-          return response.data.map(categoria => ({
-            ...categoria,
-            imgUrl: this.buildImageUrl(categoria.imgUrl, categoria.imgOrigen)
-          }));
-        }
-        throw new Error(response.message || 'Error al obtener categorías');
-      }),
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  getByCategoria(categoriaId: number): Observable<Categoria[]> {
+    return this.http.get<ApiResponseBody<Categoria[]>>(
+      `${this.apiUrl}?categoriaId=${categoriaId}`,
+      { headers: this.createHeaders() }
+    ).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  getCategoria(id: number): Observable<Categoria> {
+    return this.http.get<ApiResponseBody<Categoria>>(
+      `${this.apiUrl}/${id}`,
+      { headers: this.createHeaders() }
+    ).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  createCategoria(categoria: Categoria): Observable<Categoria> {
+    return this.http.post<ApiResponseBody<Categoria>>(
+      this.apiUrl,
+      categoria,
+      { headers: this.createHeaders() }
+    ).pipe(
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
 
   updateCategoria(categoria: Categoria): Observable<Categoria> {
+    const payload = {
+      ...categoria,
+      imgUrl: categoria.imgUrl,
+      imgOrigen: categoria.imgOrigen
+    };
+
     return this.http.put<ApiResponseBody<Categoria>>(
       `${this.apiUrl}/${categoria.id}`,
-      {
-        nombre: categoria.nombre,
-        descripcion: categoria.descripcion
-      },
+      payload,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => ({
-        ...response.data,
-        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
-      })),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
 
   uploadImage(id: number, file: File): Observable<Categoria> {
-    if (!id || isNaN(id)) {
-      return throwError(() => new Error('ID de categoría inválido'));
-    }
-    if (!file) {
-      return throwError(() => new Error('Archivo no seleccionado'));
-    }
-
     const formData = new FormData();
     formData.append('file', file, file.name);
 
@@ -68,10 +84,7 @@ export class CategoriasService {
       formData,
       { headers: this.createHeaders(false) }
     ).pipe(
-      map(response => ({
-        ...response.data,
-        imgUrl: this.buildImageUrl(response.data.imgUrl, response.data.imgOrigen)
-      })),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -80,29 +93,22 @@ export class CategoriasService {
     if (!imgUrl || !imgOrigen) {
       return 'assets/images/placeholder-category.jpg';
     }
-    const encodedImgUrl = encodeURIComponent(imgUrl);
-    return `${this.imagenBaseUrl}/${imgOrigen}/${encodedImgUrl}`;
+    return `${this.imagenBaseUrl}/${imgOrigen}/${encodeURIComponent(imgUrl)}`;
   }
 
   private createHeaders(includeJsonContentType = true): HttpHeaders {
     const token = this.authService.getToken();
     let headers = new HttpHeaders();
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    if (includeJsonContentType) {
-      headers = headers.set('Content-Type', 'application/json');
-    }
+    if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+    if (includeJsonContentType) headers = headers.set('Content-Type', 'application/json');
     return headers;
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Error desconocido';
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error del cliente: ${error.error.message}`;
-    } else {
-      errorMessage = error.error?.message || error.message;
-    }
+    const errorMessage = error.error instanceof ErrorEvent
+      ? `Error del cliente: ${error.error.message}`
+      : error.error?.message || error.message || 'Error desconocido';
+    
     console.error('Error en CategoriasService:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }

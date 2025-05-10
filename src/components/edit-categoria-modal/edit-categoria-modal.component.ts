@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Categoria } from '../../model/Categoria';
+import { CategoriasService } from '../../services/categorias.service';
 
 @Component({
   selector: 'app-edit-categoria-modal',
@@ -15,62 +16,70 @@ import { Categoria } from '../../model/Categoria';
 export class EditCategoriaModalComponent {
   editForm: FormGroup;
   selectedFile: File | null = null;
-  previewUrl?: string | ArrayBuffer | null;
+  previewUrl: string | ArrayBuffer | null = null;
   errorMessage: string | null = null;
   isSubmitting = false;
 
-  private originalName: string;
-  private originalDesc: string;
-  private originalImageUrl?: string;
+  private originalValores: {
+    nombre: string;
+    descripcion: string;
+    imgUrl?: string;
+  };
 
   constructor(
     public dialogRef: MatDialogRef<EditCategoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { categoria: Categoria },
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private categoriasService: CategoriasService
   ) {
-    this.originalName = data.categoria.nombre.trim();
-    this.originalDesc = data.categoria.descripcion.trim();
-    this.originalImageUrl = data.categoria.imgUrl;
+    this.originalValores = {
+      nombre: data.categoria.nombre.trim(),
+      descripcion: data.categoria.descripcion.trim(),
+      imgUrl: data.categoria.imgUrl
+    };
 
     this.editForm = this.fb.group({
       nombre: [
-        this.originalName,
+        this.originalValores.nombre,
         [Validators.required, Validators.minLength(3), Validators.maxLength(50)]
       ],
       descripcion: [
-        this.originalDesc,
+        this.originalValores.descripcion,
         [Validators.required, Validators.minLength(10), Validators.maxLength(255)]
       ]
     });
 
-    this.previewUrl = this.originalImageUrl;
+    this.previewUrl = this.categoriasService.buildImageUrl(
+      this.originalValores.imgUrl,
+      this.data.categoria.imgOrigen
+    );
   }
 
   get hasChanges(): boolean {
-    const nombreActual = (this.editForm.get('nombre')?.value || '').trim();
-    const descActual = (this.editForm.get('descripcion')?.value || '').trim();
+    const formValores = this.editForm.value;
+    
+    const cambiosTexto = 
+      formValores.nombre.trim() !== this.originalValores.nombre ||
+      formValores.descripcion.trim() !== this.originalValores.descripcion;
 
-    const nameChanged = nombreActual !== this.originalName;
-    const descChanged = descActual !== this.originalDesc;
-    const fileChanged = this.selectedFile != null;
-
-    return nameChanged || descChanged || fileChanged;
+    return cambiosTexto || !!this.selectedFile;
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] || null;
+    const file = input.files?.[0];
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const maxSize = 2 * 1024 * 1024; // 2MB
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxTamanoMB = 2;
 
-    if (!validTypes.includes(file.type)) {
-      this.errorMessage = 'Formato de archivo no válido';
+    if (!tiposPermitidos.includes(file.type)) {
+      this.errorMessage = 'Formato de imagen no válido (JPEG, PNG, WEBP)';
       return;
     }
-    if (file.size > maxSize) {
-      this.errorMessage = 'El archivo no puede superar 2MB';
+
+    if (file.size > maxTamanoMB * 1024 * 1024) {
+      this.errorMessage = `El tamaño máximo permitido es ${maxTamanoMB}MB`;
       return;
     }
 
@@ -85,7 +94,10 @@ export class EditCategoriaModalComponent {
 
   clearImage(): void {
     this.selectedFile = null;
-    this.previewUrl = this.originalImageUrl;
+    this.previewUrl = this.categoriasService.buildImageUrl(
+      this.originalValores.imgUrl,
+      this.data.categoria.imgOrigen
+    );
     this.errorMessage = null;
   }
 
@@ -97,20 +109,18 @@ export class EditCategoriaModalComponent {
 
     this.editForm.markAllAsTouched();
     if (this.editForm.invalid) {
-      this.errorMessage = 'Complete los campos requeridos';
+      this.errorMessage = 'Complete los campos requeridos correctamente';
       return;
     }
 
-    const nombreFinal = (this.editForm.get('nombre')?.value || '').trim();
-    const descFinal = (this.editForm.get('descripcion')?.value || '').trim();
-
-    const finalImageUrl = this.selectedFile ? undefined : this.originalImageUrl;
+    const formValores = this.editForm.value;
+    const finalImageUrl = this.selectedFile ? undefined : this.originalValores.imgUrl;
 
     const categoriaActualizada: Categoria & { imageFile?: File } = {
       ...this.data.categoria,
-      nombre: nombreFinal,
-      descripcion: descFinal,
-      imgUrl: finalImageUrl!,
+      nombre: formValores.nombre.trim(),
+      descripcion: formValores.descripcion.trim(),
+      imgUrl: finalImageUrl,
       ...(this.selectedFile && { imageFile: this.selectedFile })
     };
 
@@ -123,10 +133,14 @@ export class EditCategoriaModalComponent {
 
   getError(controlName: string): string | null {
     const control = this.editForm.get(controlName);
-    if (!control || !control.touched || !control.errors) return null;
-    if (control.hasError('required')) return 'Este campo es requerido';
-    if (control.hasError('minlength')) return `Mínimo ${control.errors!['minlength'].requiredLength} caracteres`;
-    if (control.hasError('maxlength')) return `Máximo ${control.errors!['maxlength'].requiredLength} caracteres`;
+    if (!control?.touched || !control.errors) return null;
+
+    if (control.hasError('required')) return 'Campo obligatorio';
+    if (control.hasError('minlength')) 
+      return `Mín. ${control.errors['minlength'].requiredLength} caracteres`;
+    if (control.hasError('maxlength')) 
+      return `Máx. ${control.errors['maxlength'].requiredLength} caracteres`;
+
     return null;
   }
 }

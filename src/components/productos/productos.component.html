@@ -23,7 +23,7 @@
              [class.card-hover]="hoverState === producto.id">
           <div class="card-inner">
             <div class="image-wrapper">
-              <img [src]="producto.imgUrl || 'assets/images/placeholder-product.jpg'" 
+              <img [src]="getImageUrl(producto) || 'assets/images/placeholder-product.jpg'" 
                    [alt]="producto.nombre" 
                    class="producto-image"
                    [class.image-zoom]="hoverState === producto.id"

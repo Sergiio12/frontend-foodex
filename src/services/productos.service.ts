@@ -22,7 +22,7 @@ export class ProductosService {
       this.apiUrl,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => this.handleProductListResponse(response)),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -32,7 +32,7 @@ export class ProductosService {
       `${this.apiUrl}?categoriaId=${categoriaId}`,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => this.handleProductListResponse(response)),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -42,7 +42,7 @@ export class ProductosService {
       `${this.apiUrl}/${id}`,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => this.mapProductWithImage(response.data)),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -53,7 +53,7 @@ export class ProductosService {
       producto,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => this.mapProductWithImage(response.data)),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -63,7 +63,7 @@ export class ProductosService {
       ...producto,
       categoria: { id: producto.categoria.id },
       imgUrl: producto.imgUrl,
-      imgOrigen: producto.imgOrigen
+      imgOrigen: producto.imgOrigen 
     };
 
     return this.http.put<ApiResponseBody<Producto>>(
@@ -71,7 +71,7 @@ export class ProductosService {
       payload,
       { headers: this.createHeaders() }
     ).pipe(
-      map(response => this.mapProductWithImage(response.data)),
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -85,11 +85,7 @@ export class ProductosService {
       formData,
       { headers: this.createHeaders(false) }
     ).pipe(
-      map(response => ({
-        ...response.data,
-        imgOrigen: ImagenOrigen.UPLOAD,
-        imgUrl: this.buildImageUrl(response.data.imgUrl, ImagenOrigen.UPLOAD)
-      })),
+      map(response => response.data), 
       catchError(this.handleError)
     );
   }
@@ -107,20 +103,6 @@ export class ProductosService {
     if (token) headers = headers.set('Authorization', `Bearer ${token}`);
     if (includeJsonContentType) headers = headers.set('Content-Type', 'application/json');
     return headers;
-  }
-
-  private handleProductListResponse(response: ApiResponseBody<Producto[]>): Producto[] {
-    if (response.status?.toUpperCase() === 'SUCCESS') {
-      return response.data.map(producto => this.mapProductWithImage(producto));
-    }
-    throw new Error(response.message || 'Error al obtener productos');
-  }
-
-  private mapProductWithImage(producto: Producto): Producto {
-    return {
-      ...producto,
-      imgUrl: this.buildImageUrl(producto.imgUrl, producto.imgOrigen)
-    };
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

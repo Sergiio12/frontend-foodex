@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { Categoria } from '../../model/Categoria';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CategoriasService } from '../../services/categorias.service';
+import { Categoria } from '../../model/Categoria';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { EditCategoriaModalComponent } from '../edit-categoria-modal/edit-categoria-modal.component';
-import { switchMap, filter, map } from 'rxjs/operators';
+import { switchMap, filter } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-categorias',
@@ -29,40 +29,33 @@ export class CategoriasComponent implements OnInit {
     private categoriasService: CategoriasService,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    console.log('[CategoriasComponent] ngOnInit()');
-    this.loadCategorias();
+    this.route.queryParams.subscribe(() => {
+      this.loadCategorias();
+    });
   }
 
   loadCategorias(): void {
+    console.log('[CategoriasComponent] Cargando categorías');
     this.isLoading = true;
     this.errorMessage = null;
-    console.log('[CategoriasComponent] Cargando categorías...');
   
     this.categoriasService.getAll().subscribe({
       next: (categorias: Categoria[]) => {
-        console.log('[CategoriasComponent] Categorías cargadas:', categorias);
-        this.categorias = categorias; 
+        this.categorias = categorias;
         this.isLoading = false;
       },
       error: (err) => {
-        setTimeout(() => {
-          this.isLoading = false;
-          this.handleLoadError(err);
-        }, 3000);
+        this.isLoading = false;
+        this.handleLoadError(err);
       }
     });
   }
 
-  verProductos(categoriaId: number): void {
-    this.router.navigate(['/productos'], {
-      queryParams: { categoriaId }
-    });
-  }
-  
   onRetry(): void {
     this.errorMessage = null;
     this.loadCategorias();
@@ -80,26 +73,28 @@ export class CategoriasComponent implements OnInit {
   editCategoria(categoria: Categoria): void {
     const dialogRef = this.dialog.open(EditCategoriaModalComponent, {
       width: '600px',
-      data: { categoria: { ...categoria } }
+      data: { 
+        categoria: { 
+          ...categoria
+        } 
+      }
     });
 
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
-      switchMap(result => {
-        if (!result.id || isNaN(result.id)) {
+      switchMap((result: Categoria & { imageFile?: File }) => {
+        const { imageFile, ...categoriaToUpdate } = result;
+        
+        if (!categoriaToUpdate.id || isNaN(categoriaToUpdate.id)) {
           return throwError(() => new Error('ID de categoría inválido'));
         }
-        return this.categoriasService.updateCategoria(result).pipe(
+        
+        return this.categoriasService.updateCategoria(categoriaToUpdate).pipe(
           switchMap(updatedCategoria => {
-            if (!result.imageFile) return of(updatedCategoria);
-            if (!updatedCategoria?.id) {
-              return throwError(() => new Error('ID no recibido del servidor'));
-            }
+            if (!imageFile) return of(updatedCategoria);
             return this.categoriasService.uploadImage(
-              Number(updatedCategoria.id),
-              result.imageFile
-            ).pipe(
-              map(() => updatedCategoria)
+              updatedCategoria.id,
+              imageFile
             );
           })
         );
@@ -110,43 +105,55 @@ export class CategoriasComponent implements OnInit {
     });
   }
 
-  private handleLoadError(err: HttpErrorResponse): void {
-    this.errorMessage = this.getErrorMessage(err);
-    console.error('[CategoriasComponent] Error:', err);
+  getImageUrl(categoria: Categoria): string {
+    return this.categoriasService.buildImageUrl(
+      categoria.imgUrl, 
+      categoria.imgOrigen
+    );
+  }
+
+  verProductos(categoriaId: number): void {
+    this.router.navigate(['/productos'], {
+      queryParams: { categoriaId }
+    });
   }
 
   private handleUpdateSuccess(updatedCategoria: Categoria): void {
-    this.categorias = this.categorias.map(c => {
-      if (c.id === updatedCategoria.id) {
-        return {
-          ...updatedCategoria,
-          imgUrl: updatedCategoria.imgUrl || c.imgUrl
-        };
-      }
-      return c;
-    });
-    this.errorMessage = null;
+    this.categorias = this.categorias.map(c => 
+      c.id === updatedCategoria.id ? {
+        ...updatedCategoria,
+        imgUrl: updatedCategoria.imgUrl || c.imgUrl
+      } : c
+    );
   }
 
   private handleUpdateError(err: Error | HttpErrorResponse): void {
+    this.isLoading = false;
     const message = err instanceof HttpErrorResponse 
       ? this.getErrorMessage(err)
       : err.message;
     
     this.errorMessage = message;
-    console.error('Error actualizando categoría:', err);
+    console.error('Error en operación:', err);
     
     setTimeout(() => this.errorMessage = null, 5000);
   }
 
+  private handleLoadError(err: HttpErrorResponse): void {
+    this.errorMessage = this.getErrorMessage(err);
+    console.error('[CategoriasComponent] Error:', err);
+  }
+
   private getErrorMessage(err: HttpErrorResponse): string {
     if (!err) return 'Error desconocido';
-    if (err.status === 400) return 'Datos inválidos enviados al servidor';
-    if (err.status === 401) return 'Sesión expirada. Por favor, inicie sesión nuevamente.';
-    if (err.status === 403) return 'No tiene permisos para esta acción';
-    if (err.status === 404) return 'Categoría no encontrada';
-    if (err.status === 413) return 'La imagen es demasiado grande (Máx 2MB)';
-    if (err.status === 415) return 'Formato de imagen no soportado';
-    return err.error?.message || err.message || 'Error desconocido';
+    switch(err.status) {
+      case 400: return 'Datos inválidos enviados al servidor';
+      case 401: return 'Sesión expirada. Por favor, inicie sesión nuevamente.';
+      case 403: return 'No tiene permisos para esta acción';
+      case 404: return 'Categoría no encontrada';
+      case 413: return 'La imagen es demasiado grande (Máx 2MB)';
+      case 415: return 'Formato de imagen no soportado';
+      default: return err.error?.message || err.message || 'Error desconocido';
+    }
   }
 }

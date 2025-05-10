@@ -23,7 +23,7 @@
            [class.card-hover]="hoverState === categoria.id">
         <div class="card-inner">
           <div class="image-wrapper">
-            <img [src]="categoria.imgUrl" 
+            <img [src]="getImageUrl(categoria) || 'assets/images/placeholder-category.jpg'" 
                  [alt]="categoria.nombre" 
                  class="categoria-image"
                  [class.image-zoom]="hoverState === categoria.id"
