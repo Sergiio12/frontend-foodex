@@ -46,8 +46,8 @@ export class ProductosService {
       catchError(this.handleError)
     );
   }
-
-  createProducto(producto: Producto): Observable<Producto> {
+  
+  createProducto(producto: Omit<Producto, 'id'>): Observable<Producto> {
     return this.http.post<ApiResponseBody<Producto>>(
       this.apiUrl,
       producto,

@@ -11,6 +11,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
+import { CreateProductoModalComponent } from '../create-producto-modal/create-producto-modal.component';
 
 @Component({
   selector: 'app-productos',
@@ -115,6 +116,19 @@ export class ProductosComponent implements OnInit {
       producto.imgUrl, 
       producto.imgOrigen
     );
+  }
+
+  openCreateProductoModal(): void {
+    const dialogRef = this.dialog.open(CreateProductoModalComponent, {
+      width: '800px',
+      panelClass: 'custom-dialog-container'
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadProductos(); 
+      }
+    });
   }
 
   private handleUpdateSuccess(updatedProducto: Producto): void {
