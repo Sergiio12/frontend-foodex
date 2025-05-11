@@ -133,12 +133,11 @@ export class CreateProductoModalComponent implements OnInit {
       stock: parseInt(formValue.stock, 10),
       descatalogado: formValue.descatalogado,
       categoria: { id: formValue.categoria } as Categoria,
-      fechaAlta: new Date().toISOString()
     };
 
     this.productosService.createProducto(nuevoProducto).pipe(
       switchMap((productoCreado) => {
-        return this.productosService.uploadImage(productoCreado.id, this.selectedFile!);
+        return this.productosService.uploadImage(productoCreado.id!, this.selectedFile!);
       })
     ).subscribe({
       next: (productoFinal) => {

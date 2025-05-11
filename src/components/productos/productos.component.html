@@ -28,7 +28,7 @@
       <div class="grid-container">
         <article class="producto-card" 
              *ngFor="let producto of productos"
-             (mouseenter)="hoverState = producto.id"
+             (mouseenter)="hoverState = producto.id!"
              (mouseleave)="hoverState = null"
              [class.card-hover]="hoverState === producto.id">
           <div class="card-inner">

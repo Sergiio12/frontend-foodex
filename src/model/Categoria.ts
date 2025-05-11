@@ -1,7 +1,7 @@
 import { ImagenOrigen } from "./ImagenOrigen";
 
 export interface Categoria {
-  id: number;
+  id?: number;
   nombre: string;
   descripcion: string;
   imgUrl?: string;

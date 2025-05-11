@@ -98,6 +98,11 @@ export class ProductosComponent implements OnInit {
         return this.productosService.updateProducto(productoToUpdate).pipe(
           switchMap(updatedProducto => {
             if (!imageFile) return of(updatedProducto);
+            
+            if (!updatedProducto.id) {
+              return throwError(() => new Error('ID de producto no encontrado'));
+            }
+            
             return this.productosService.uploadImage(
               updatedProducto.id,
               imageFile
@@ -109,7 +114,7 @@ export class ProductosComponent implements OnInit {
       next: (finalProducto) => this.handleUpdateSuccess(finalProducto),
       error: (err) => this.handleUpdateError(err)
     });
-  }
+}
 
   getImageUrl(producto: Producto): string {
     return this.productosService.buildImageUrl(

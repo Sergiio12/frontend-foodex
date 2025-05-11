@@ -86,7 +86,7 @@ export class CartModalComponent implements OnInit, OnDestroy {
   }
 
   trackByProductId(index: number, item: ItemCarrito): number {
-    return item.producto.id + item.cantidad;
+    return item.producto.id! + item.cantidad;
   }
 
   close(): void {

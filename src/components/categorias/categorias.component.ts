@@ -11,6 +11,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
+import { CreateCategoriaModalComponent } from '../create-categoria-modal/create-categoria-modal.component';
 
 @Component({
   selector: 'app-categorias',
@@ -92,8 +93,13 @@ export class CategoriasComponent implements OnInit {
         return this.categoriasService.updateCategoria(categoriaToUpdate).pipe(
           switchMap(updatedCategoria => {
             if (!imageFile) return of(updatedCategoria);
+            
+            if (!updatedCategoria.id) {
+              return throwError(() => new Error('ID de categoría no encontrado'));
+            }
+            
             return this.categoriasService.uploadImage(
-              updatedCategoria.id,
+              updatedCategoria.id, 
               imageFile
             );
           })
@@ -117,6 +123,19 @@ export class CategoriasComponent implements OnInit {
       queryParams: { categoriaId }
     });
   }
+
+  openCreateCategoriaModal(): void {
+      const dialogRef = this.dialog.open(CreateCategoriaModalComponent, {
+        width: '800px',
+        panelClass: 'custom-dialog-container'
+      });
+    
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.loadCategorias(); 
+        }
+      });
+    }
 
   private handleUpdateSuccess(updatedCategoria: Categoria): void {
     this.categorias = this.categorias.map(c => 
