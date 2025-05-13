@@ -75,6 +75,26 @@ export class ProductosComponent implements OnInit {
     return this.authService.hasRole('ROLE_ADMIN');
   }
 
+  deleteProducto(producto: Producto): void {
+    if (!producto.id) return;
+
+    const confirmation = confirm(`¿Estás seguro de eliminar el producto "${producto.nombre}"?`);
+    if (!confirmation) return;
+
+    this.isLoading = true;
+    
+    this.productosService.deleteProducto(producto.id).subscribe({
+      next: () => {
+        this.productos = this.productos.filter(p => p.id !== producto.id);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.handleDeleteError(err);
+      }
+    });
+  }
+
   editProducto(producto: Producto): void {
     const dialogRef = this.dialog.open(EditProductoModalComponent, {
       width: '600px',
@@ -174,4 +194,30 @@ export class ProductosComponent implements OnInit {
       default: return err.error?.message || err.message || 'Error desconocido';
     }
   }
+
+  private handleDeleteError(err: Error | HttpErrorResponse): void {
+    let errorMessage = 'Error al eliminar el producto';
+    
+    if (err instanceof HttpErrorResponse) {
+      switch(err.status) {
+        case 404:
+          errorMessage = 'El producto no existe o ya fue eliminado';
+          break;
+        case 403:
+          errorMessage = 'No tienes permisos para esta acción';
+          break;
+        case 500:
+          errorMessage = 'Error del servidor al procesar la solicitud';
+          break;
+      }
+      
+      if (err.error?.message) {
+        errorMessage += `: ${err.error.message}`;
+      }
+    }
+    
+    this.errorMessage = errorMessage;
+    setTimeout(() => this.errorMessage = null, 5000);
+  }
+  
 }

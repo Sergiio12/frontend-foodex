@@ -46,6 +46,20 @@ export class ProductosService {
       catchError(this.handleError)
     );
   }
+
+  deleteProducto(id: number): Observable<void> {
+    return this.http.delete<ApiResponseBody<void>>(
+      `${this.apiUrl}/${id}`,
+      { headers: this.createHeaders() }
+    ).pipe(
+      map(response => {
+        if (response.status !== "success") {
+          throw new Error(response.message || 'Error desconocido al eliminar');
+        }
+      }),
+      catchError(this.handleError)
+    );
+  }
   
   createProducto(producto: Omit<Producto, 'id'>): Observable<Producto> {
     return this.http.post<ApiResponseBody<Producto>>(
