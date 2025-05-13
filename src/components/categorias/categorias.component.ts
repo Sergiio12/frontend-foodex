@@ -71,6 +71,26 @@ export class CategoriasComponent implements OnInit {
     return this.authService.hasRole('ROLE_ADMIN');
   }
 
+  deleteCategoria(categoria: Categoria): void {
+  if (!categoria.id) return;
+
+  const confirmation = confirm(`¿Estás seguro de eliminar la categoría "${categoria.nombre}"?`);
+  if (!confirmation) return;
+
+  this.isLoading = true;
+  
+  this.categoriasService.deleteCategoria(categoria.id).subscribe({
+    next: () => {
+      this.categorias = this.categorias.filter(c => c.id !== categoria.id);
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.handleDeleteError(err);
+    }
+  });
+}
+
   editCategoria(categoria: Categoria): void {
     const dialogRef = this.dialog.open(EditCategoriaModalComponent, {
       width: '600px',
@@ -175,4 +195,30 @@ export class CategoriasComponent implements OnInit {
       default: return err.error?.message || err.message || 'Error desconocido';
     }
   }
+
+  private handleDeleteError(err: Error | HttpErrorResponse): void {
+    let errorMessage = 'Error al eliminar la categoría';
+    
+    if (err instanceof HttpErrorResponse) {
+      switch(err.status) {
+        case 404:
+          errorMessage = 'La categoría no existe o ya fue eliminada';
+          break;
+        case 403:
+          errorMessage = 'No tienes permisos para esta acción';
+          break;
+        case 500:
+          errorMessage = 'Error del servidor al procesar la solicitud';
+          break;
+      }
+      
+      if (err.error?.message) {
+        errorMessage += `: ${err.error.message}`;
+      }
+    }
+    
+    this.errorMessage = errorMessage;
+    setTimeout(() => this.errorMessage = null, 5000);
+  }
+
 }
