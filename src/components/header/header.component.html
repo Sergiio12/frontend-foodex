@@ -3,6 +3,8 @@
     <div class="nav-left">
       <a routerLink="/home" class="nav-brand hover-underline" aria-label="Página de inicio">Nosotros</a>
       <a class="nav-link hover-underline" (click)="navigateToCatalogo()" role="button" aria-label="Ver catálogo">Catálogo</a>
+      <a *ngIf="hasAdminRole()" class="nav-link hover-underline" (click)="navigateToAdministracion()" role="button" aria-label="Ir a área de administración"> Área de administrador </a>
+
     </div>
 
     <div class="nav-right">
@@ -51,7 +53,7 @@
                  role="menuitem" 
                  routerLink="/settings"
                  (click)="isUserMenuOpen = false">
-              <i class="icon-settings" aria-hidden="true"></i>Configuración
+              <i class="icon-settings" aria-hidden="true"></i>Mis pedidos
             </div>
             <div class="menu-divider" aria-hidden="true"></div>
             <div class="menu-item" 

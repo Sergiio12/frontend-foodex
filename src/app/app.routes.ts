@@ -4,13 +4,15 @@ import { RegisterComponent } from '../components/auth/register/register.componen
 import { HomepageComponent } from '../components/homepage/homepage.component';
 import { CategoriasComponent } from '../components/categorias/categorias.component';
 import { ProductosComponent } from '../components/productos/productos.component';
+import { AdministracionComponent } from '../components/administracion/administracion.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomepageComponent},
   { path: 'productos', component: ProductosComponent },
   { path: 'catalogo', component: CategoriasComponent},
-  { path: '', redirectTo: '/home', pathMatch: 'full' }, 
   { path: 'signup', component: RegisterComponent },
+  { path: 'administracion', component: AdministracionComponent },
+  { path: '', redirectTo: '/home', pathMatch: 'full' }, 
   
 ];

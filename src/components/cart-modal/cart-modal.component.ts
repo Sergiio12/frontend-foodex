@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Output, HostListener, OnInit, OnDestroy, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { CartService } from '../../services/cart.service';
 import { ProductosService } from '../../services/productos.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -9,17 +8,26 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { isEqual } from 'lodash';
 import { ApiResponseBody } from '../../model/ApiResponseBody';
 import { CarritoResponse } from '../../payloads/CarritoResponse';
+import { CartService } from '../../services/cart.service';
+import { CompraService } from '../../services/compras.service';
+import { CheckoutModalComponent } from '../checkout-modal/checkout-modal.component';
+import { CompraRequestDTO } from '../../model/CompraRequestDTO';
 
 @Component({
   selector: 'app-cart-modal',
   standalone: true,
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatDialogModule, CheckoutModalComponent],
   templateUrl: './cart-modal.component.html',
   styleUrls: ['./cart-modal.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CartModalComponent implements OnInit, OnDestroy {
   @Output() closeModal = new EventEmitter<void>();
+  
+
+  showCheckout = false;
+  checkoutLoading = false;
+  checkoutError: string | null = null;
 
   defaultImage = 'assets/default-product.png';
   combinedData$!: Observable<{
@@ -31,6 +39,7 @@ export class CartModalComponent implements OnInit, OnDestroy {
 
   constructor(
     public cartService: CartService,
+    public compraService: CompraService,
     private productosService: ProductosService,
     private router: Router,
     public dialogRef: MatDialogRef<CartModalComponent>,
@@ -46,6 +55,10 @@ export class CartModalComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  iniciarCheckout() {
+    this.showCheckout = true;
+  } 
 
   updateQuantity(productId: number, newQuantity: number): void {
     if (newQuantity < 0 || newQuantity === this.getCurrentQuantity(productId)) return;
@@ -80,13 +93,20 @@ export class CartModalComponent implements OnInit, OnDestroy {
   }
 
   removeItem(productId: number): void {
+    this.cartService.setLoading(true); 
+    
     this.cartService.removeItem(productId).pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
+      finalize(() => this.cartService.setLoading(false)),
+      catchError(error => {
+        console.error('Error eliminando ítem:', error);
+        return throwError(() => error);
+      })
     ).subscribe();
   }
 
   trackByProductId(index: number, item: ItemCarrito): number {
-    return item.producto.id! + item.cantidad;
+    return item.producto.id!;
   }
 
   close(): void {
@@ -109,6 +129,28 @@ export class CartModalComponent implements OnInit, OnDestroy {
     });
   }
 
+  finalizarCompra(datos: CompraRequestDTO) {
+    this.checkoutLoading = true;
+    this.checkoutError = null;
+    
+    this.compraService.realizarCompra(datos).subscribe({
+      next: () => {
+        this.cartService.clearCart();
+        this.showCheckout = false;
+        this.close();
+      },
+      error: (err) => {
+        this.checkoutError = err.message;
+        this.checkoutLoading = false;
+      },
+      complete: () => this.checkoutLoading = false
+    });
+}
+
+  cerrarCheckout() {
+    this.showCheckout = false;
+  }
+
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     this.close();
@@ -121,17 +163,18 @@ export class CartModalComponent implements OnInit, OnDestroy {
   }
 
   private initializeCombinedData(): void {
-    this.combinedData$ = combineLatest({
-      cart: this.cartService.cart$.pipe(
-        distinctUntilChanged((prev, curr) => isEqual(prev?.data.itemsCarrito, curr?.data.itemsCarrito))
-      ),
-      loading: this.cartService.isLoading$.pipe(
-        distinctUntilChanged()
-      )
-    }).pipe(
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-  }
+  this.combinedData$ = combineLatest({
+    cart: this.cartService.cart$.pipe(
+      shareReplay({ bufferSize: 1, refCount: true }),
+      distinctUntilChanged((prev, curr) => isEqual(prev?.data?.itemsCarrito, curr?.data?.itemsCarrito))
+    ),
+    loading: this.cartService.isLoading$.pipe(
+      distinctUntilChanged()
+    )
+  }).pipe(
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+}
 
   private initializeCart(): void {
     this.cartService.getCart().pipe(

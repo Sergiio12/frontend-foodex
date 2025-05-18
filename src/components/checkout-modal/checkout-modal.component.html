@@ -1,0 +1,64 @@
+<div class="modal-overlay">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">Finalizar Compra</h2>
+    <p class="total-display">Total: {{ total | currency:'EUR':'symbol':'1.2-2' }}</p>
+    
+    <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <!-- Sección Dirección -->
+        <div formGroupName="direccion">
+          <h3>Dirección de Entrega</h3>
+          <div class="input-group">
+            <label for="calle">Calle y número</label>
+            <input id="calle" formControlName="calle" placeholder="Ej: Avenida del Comercio 123">
+          </div>
+          <div class="input-group">
+            <label for="codPostal">Código Postal</label>
+            <input id="codPostal" formControlName="codPostal" placeholder="Ej: 28001">
+          </div>
+          <div class="input-group">
+            <label for="bloque">Bloque/Edificio</label>
+            <input id="bloque" formControlName="bloque" placeholder="Ej: Edificio Centro">
+          </div>
+          <div class="input-group">
+            <label for="portal">Portal</label>
+            <input id="portal" formControlName="portal" placeholder="Ej: Portal 4">
+          </div>
+          <div class="input-group">
+            <label for="ciudad">Ciudad</label>
+            <input id="ciudad" formControlName="ciudad" placeholder="Ej: Madrid">
+          </div>
+          <div class="input-group">
+            <label for="pais">País</label>
+            <input id="pais" formControlName="pais" placeholder="Ej: España">
+          </div>
+        </div>
+
+        <!-- Sección Contacto -->
+        <div formGroupName="datosContacto">
+          <h3>Datos de Contacto</h3>
+          <div class="input-group">
+            <label for="telefono">Teléfono móvil</label>
+            <input id="telefono" formControlName="telefono" placeholder="Ej: +34 612 345 678">
+          </div>
+          <div class="input-group">
+            <label for="email">Correo electrónico</label>
+            <input id="email" formControlName="email" placeholder="Ej: contacto@ejemplo.com">
+          </div>
+        </div>
+      </div>
+
+      <!-- Comentarios -->
+      <div class="input-group">
+        <label for="comentario">Comentarios adicionales</label>
+        <textarea id="comentario" formControlName="comentario" placeholder="Detalles importantes para la entrega (ej: código de acceso, horario preferente, etc.)"></textarea>
+      </div>
+
+      <!-- Acciones -->
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn-confirm" [disabled]="!checkoutForm.valid">Confirmar Compra</button>
+      </div>
+    </form>
+  </div>
+</div>

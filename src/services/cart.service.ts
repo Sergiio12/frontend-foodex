@@ -21,7 +21,6 @@ export class CartService {
         total: res.data?.total || 0 
       }
     } : null),
-    distinctUntilChanged((prev, curr) => isEqual(prev?.data.itemsCarrito, curr?.data.itemsCarrito)),
     shareReplay(1)
   );
 
@@ -61,8 +60,20 @@ export class CartService {
     const params = new HttpParams()
       .set('idProducto', productId.toString())
       .set('cantidad', cantidad.toString());
-    return this.http.put<ApiResponseBody<CarritoResponse>>(`${this.API_URL}/añadir`, null, { headers: this.authHeaders, params }).pipe(
-      tap(response => this.handleCartResponse(response)),
+
+    return this.http.put<ApiResponseBody<CarritoResponse>>(`${this.API_URL}/añadir`, null, {
+      headers: this.authHeaders,
+      params
+    }).pipe(
+      tap(response => {
+        if (response.status === 'success') {
+          // Actualiza el BehaviorSubject (opcional)
+          const validated = this.validateCart(response);
+          this.cartSubject.next(validated);
+          // Forzamos recarga de la página para que el badge se pinte
+          window.location.reload();
+        }
+      }),
       catchError(err => this.handleError(err)),
       finalize(() => this.setLoading(false))
     );
@@ -70,12 +81,37 @@ export class CartService {
 
   modifyItem(productId: number, nuevaCantidad: number): Observable<ApiResponseBody<CarritoResponse>> {
     this.setLoading(true);
+    
+    const currentCart = this.cartSubject.value;
+      if (currentCart?.data) {
+      const updatedItems = currentCart.data.itemsCarrito?.map(item => 
+        item.producto.id === productId ? {...item, cantidad: nuevaCantidad} : item
+      ) || [];
+      
+      const optimisticTotal = updatedItems.reduce((sum, item) => sum + (item.producto.precio * item.cantidad), 0);
+      
+      this.cartSubject.next({
+        ...currentCart,
+        data: {
+          itemsCarrito: updatedItems,
+          total: optimisticTotal
+        }
+      });
+    }
+
     const params = new HttpParams()
       .set('idProducto', productId.toString())
       .set('nuevaCantidad', nuevaCantidad.toString());
-    return this.http.put<ApiResponseBody<CarritoResponse>>(`${this.API_URL}/modificar`, null, { headers: this.authHeaders, params }).pipe(
+    
+    return this.http.put<ApiResponseBody<CarritoResponse>>(`${this.API_URL}/modificar`, null, { 
+      headers: this.authHeaders, 
+      params 
+    }).pipe(
       tap(response => this.handleCartResponse(response)),
-      catchError(err => this.handleError(err)),
+      catchError(err => {
+        if (currentCart) this.cartSubject.next(currentCart);
+        return this.handleError(err);
+      }),
       finalize(() => this.setLoading(false))
     );
   }
@@ -107,19 +143,35 @@ export class CartService {
 
   private handleCartResponse(response: ApiResponseBody<CarritoResponse>): void {
     if (response.status === 'success') {
-      const newCart = this.validateCart(response);
+      const validatedResponse = this.validateCart(response);
       const currentItems = this.cartSubject.value?.data?.itemsCarrito || [];
-      const newItems = newCart.data?.itemsCarrito || [];
-
+      const newItems = validatedResponse.data?.itemsCarrito || [];
+      
       if (!isEqual(currentItems, newItems)) {
-        this.cartSubject.next({ ...response, data: { ...newCart.data } });
+        this.cartSubject.next({
+          ...validatedResponse,
+          data: {
+            itemsCarrito: newItems,
+            total: validatedResponse.data?.total || 0
+          }
+        });
       }
     }
   }
 
   private validateCart(response: ApiResponseBody<CarritoResponse>): ApiResponseBody<CarritoResponse> {
-    const items = response.data.itemsCarrito.filter(i => i.producto.id && i.cantidad > 0);
-    return { ...response, data: { ...response.data, itemsCarrito: items }};
+    const safeData = response.data || { itemsCarrito: [], total: 0 };
+    const validItems = safeData.itemsCarrito?.filter(i => 
+      i?.producto?.id && i.cantidad > 0
+    ) || [];
+    
+    return {
+      ...response,
+      data: {
+        itemsCarrito: validItems,
+        total: safeData.total || validItems.reduce((sum, item) => sum + (item.producto.precio * item.cantidad), 0)
+      }
+    };
   }
 
   private handleError(error: any): Observable<never> {

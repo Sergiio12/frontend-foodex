@@ -12,6 +12,10 @@ import { of, throwError } from 'rxjs';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
 import { CreateProductoModalComponent } from '../create-producto-modal/create-producto-modal.component';
+import { CartService } from '../../services/cart.service';
+import { ApiResponseBody } from '../../model/ApiResponseBody';
+import { CarritoResponse } from '../../payloads/CarritoResponse';
+import { ItemCarrito } from '../../model/ItemCarrito';
 
 @Component({
   selector: 'app-productos',
@@ -25,19 +29,49 @@ export class ProductosComponent implements OnInit {
   errorMessage: string | null = null;
   isLoading: boolean = true;
   hoverState: number | null = null;
+  addedToCartIds: number[] = [];
+
 
   constructor(
     private productosService: ProductosService,
     private authService: AuthService,
+    private cartService: CartService,
     private router: Router,
     private route: ActivatedRoute,
     public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
+    this.loadCart();
     this.route.queryParams.subscribe(params => {
       this.loadProductos(params['categoriaId']);
     });
+  }
+
+  addToCart(productId: number, cantidad: number): void {
+    if (this.isInCart(productId)) {
+      console.warn('El producto ya está en el carrito');
+      return;
+    }
+
+    this.cartService.addItem(productId, cantidad).subscribe({
+      next: (resp) => {
+        this.addedToCartIds = [...this.addedToCartIds, productId]; // Inmutabilidad
+        console.log('Añadido al carrito:', resp);
+      },
+      error: (err) => {
+        console.error('Error al añadir al carrito:', err);
+        this.handleCartError(err);
+      }
+    });
+  }
+
+  isInCart(productId: number): boolean {
+    return this.addedToCartIds.includes(productId);
+  }
+
+  getButtonText(productId: number): string {
+    return this.isInCart(productId) ? 'Añadido' : 'Añadir al carrito';
   }
 
   loadProductos(categoriaId?: number): void {
@@ -154,6 +188,38 @@ export class ProductosComponent implements OnInit {
         this.loadProductos(); 
       }
     });
+  }
+
+  private loadCart(): void {
+    this.cartService.getCart().subscribe({
+      next: (response) => {
+        if (response.data?.itemsCarrito) {
+          this.addedToCartIds = response.data.itemsCarrito
+            .filter(item => item?.producto?.id !== undefined) 
+            .map(item => item.producto.id!); 
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar carrito:', err);
+        this.addedToCartIds = [];
+      }
+    });
+  }
+
+  private handleCartError(err: HttpErrorResponse): void {
+    let errorMessage = 'Error en la operación del carrito';
+    
+    if (err.status === 401) {
+      errorMessage = 'Debes iniciar sesión para añadir productos al carrito';
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    } else if (err.status === 409) {
+      errorMessage = 'El producto ya está en el carrito';
+      this.loadCart(); // Sincronizar estado
+    }
+    
+    this.errorMessage = errorMessage;
+    setTimeout(() => this.errorMessage = null, 5000);
   }
 
   private handleUpdateSuccess(updatedProducto: Producto): void {

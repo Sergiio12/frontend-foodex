@@ -207,6 +207,43 @@
   font-size: 1.1rem;
 }
 
+/* Estado vacío de categorías */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;        /* Ocupa un espacio suficiente */
+  margin: 2rem 1rem;
+  padding: 2rem;
+  background: #ffffff;
+  border: 2px dashed #bdc3c7;
+  border-radius: 12px;
+  text-align: center;
+  color: #7f8c8d;
+}
+
+.empty-state p {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state .create-first-button {
+  padding: 0.75rem 1.5rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.empty-state .create-first-button:hover {
+  background: #318cd0;
+}
+
+
 /* Responsive */
 @media (max-width: 768px) {
   .grid-container {

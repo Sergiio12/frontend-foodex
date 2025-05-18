@@ -42,7 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private cartService: CartService,
     private router: Router,
-    @Inject(MatDialog) private dialog: MatDialog // Solo mantener MatDialog
+    @Inject(MatDialog) private dialog: MatDialog 
   ) {}
 
   ngOnInit(): void {
@@ -110,6 +110,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
         queryParams: { returnUrl: '/catalogo' } 
       });
     }
+  }
+
+  navigateToAdministracion(): void {
+    this.router.navigate(['/administracion']);
+  }
+
+  hasAdminRole(): boolean {
+    return this.authService.hasRole('ROLE_ADMIN');
   }
   
   private checkViewport(): void {

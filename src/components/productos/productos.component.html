@@ -1,81 +1,110 @@
 <main class="main-content">
-    <button *ngIf="hasAdminRole()" 
-            class="floating-create-button"
-            (click)="openCreateProductoModal()"
-            aria-label="Crear nuevo producto">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-    </button>
+  <!-- Botón flotante de creación solo para admins -->
+  <button *ngIf="hasAdminRole()"
+          class="floating-create-button"
+          (click)="openCreateProductoModal()"
+          aria-label="Crear nuevo producto">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+    </svg>
+  </button>
 
-    <app-loading-modal *ngIf="isLoading"></app-loading-modal>
+  <!-- Modales de carga y error -->
+  <app-loading-modal *ngIf="isLoading"></app-loading-modal>
+  <app-error-modal
+    *ngIf="errorMessage && !isLoading"
+    [errorMessage]="errorMessage"
+    (retry)="onRetry()"
+    (close)="onCloseErrorModal()">
+  </app-error-modal>
 
-    <app-error-modal 
-        *ngIf="errorMessage && !isLoading"
-        [errorMessage]="errorMessage"
-        (retry)="onRetry()"
-        (close)="onCloseErrorModal()">
-    </app-error-modal>
-
-    <div *ngIf="!isLoading && !errorMessage" class="productos-grid">
-        <div class="section-header">
-            <h1 class="section-title">Nuestros Productos</h1>
-            <p class="section-subtitle">Descubre una selección única de artículos de alta calidad</p>
-        </div>
-        
-        <div class="grid-container">
-            <article class="producto-card" 
-                    *ngFor="let producto of productos"
-                    (mouseenter)="hoverState = producto.id!"
-                    (mouseleave)="hoverState = null"
-                    [class.card-hover]="hoverState === producto.id">
-                <div class="card-inner">
-                    <div class="image-wrapper">
-                        <img [src]="getImageUrl(producto) || 'assets/images/placeholder-product.jpg'" 
-                            [alt]="producto.nombre" 
-                            class="producto-image"
-                            [class.image-zoom]="hoverState === producto.id"
-                            loading="eager">
-                        <div class="image-overlay"></div>
-                    </div>
-                    
-                    <div class="card-content">
-                        <div class="text-content">
-                            <h3 class="producto-title">{{ producto.nombre }}</h3>
-                            <p class="producto-description">{{ producto.descripcion }}</p>
-                            <div class="producto-info">
-                                <div class="price-stock">
-                                    <span class="price">€{{ producto.precio | number:'1.2-2' }}</span>
-                                    <span class="stock">{{ producto.stock }} unidades</span>
-                                </div>
-                                <span class="status-tag" 
-                                    [class.descatalogado]="producto.descatalogado"
-                                    [class.disponible]="!producto.descatalogado">
-                                    {{ producto.descatalogado ? 'Descatalogado' : 'Disponible' }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="admin-buttons-container">
-                            <button *ngIf="hasAdminRole()" 
-                                    class="admin-button edit-button" 
-                                    (click)="editProducto(producto)">
-                                <svg class="admin-icon edit-icon" viewBox="0 0 24 24">
-                                    <path fill="currentColor" d="M20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3c-.4-.4-1-.4-1.4 0l-1.8 1.8L19 8.1M3 17.2V21h3.8l11-11.1l-3.7-3.8L3 17.2"/>
-                                </svg>
-                            </button>
-                            
-                            <button *ngIf="hasAdminRole()" 
-                                    class="admin-button delete-button" 
-                                    (click)="deleteProducto(producto)">
-                                <svg class="admin-icon trash-icon" viewBox="0 0 24 24">
-                                    <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </div>
+  <!-- Contenedor principal, sólo si no estamos cargando ni hay error -->
+  <ng-container *ngIf="!isLoading && !errorMessage">
+    
+    <!-- Estado vacío -->
+    <div *ngIf="productos.length === 0" class="empty-state">
+      <p>No se encontraron productos en esta categoría.</p>
+      <button *ngIf="hasAdminRole()" (click)="openCreateProductoModal()" class="create-first-button">
+        Crear primer producto
+      </button>
     </div>
+
+    <!-- Grid de productos -->
+    <div *ngIf="productos.length > 0" class="productos-grid">
+      <div class="section-header">
+        <h1 class="section-title">Nuestros Productos</h1>
+        <p class="section-subtitle">Descubre una selección única de artículos de alta calidad</p>
+      </div>
+
+      <div class="grid-container">
+        <ng-container *ngFor="let producto of productos">
+          <article class="producto-card"
+                   *ngIf="!producto.descatalogado || hasAdminRole()"
+                   (mouseenter)="hoverState = producto.id!"
+                   (mouseleave)="hoverState = null"
+                   [class.card-hover]="hoverState === producto.id">
+            
+            <div class="card-inner">
+              <!-- Imagen -->
+              <div class="image-wrapper">
+                <img
+                  [src]="getImageUrl(producto) || 'assets/images/placeholder-product.jpg'"
+                  [alt]="producto.nombre"
+                  class="producto-image"
+                  [class.image-zoom]="hoverState === producto.id"
+                  loading="eager">
+                <div class="image-overlay"></div>
+              </div>
+
+              <!-- Contenido -->
+              <div class="card-content">
+                <div class="text-content">
+                  <h3 class="producto-title">{{ producto.nombre }}</h3>
+                  <p class="producto-description">{{ producto.descripcion }}</p>
+                  <div class="producto-info">
+                    <div class="price-stock">
+                      <span class="price">€{{ producto.precio | number:'1.2-2' }}</span>
+                      <span class="stock">{{ producto.stock }} unidades</span>
+                    </div>
+                    <span class="status-tag"
+                          [class.descatalogado]="producto.descatalogado"
+                          [class.disponible]="!producto.descatalogado">
+                      {{ producto.descatalogado ? 'Descatalogado' : 'Disponible' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Botones admin -->
+                <div class="admin-buttons-container" *ngIf="hasAdminRole()">
+                  <button class="admin-button edit-button"
+                          (click)="editProducto(producto)">
+                    <svg class="admin-icon edit-icon" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3c-.4-.4-1-.4-1.4 0l-1.8 1.8L19 8.1M3 17.2V21h3.8l11-11.1l-3.7-3.8L3 17.2"/>
+                    </svg>
+                  </button>
+                  <button class="admin-button delete-button"
+                          (click)="deleteProducto(producto)">
+                    <svg class="admin-icon trash-icon" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Añadir al carrito -->
+                <div class="user-add-to-cart">
+                  <button
+                    class="add-to-cart-button"
+                    [class.added]="isInCart(producto.id!)"
+                    [disabled]="producto.descatalogado || producto.stock === 0 || isInCart(producto.id!)"
+                    (click)="addToCart(producto.id!, 1)">
+                    {{ producto.descatalogado ? 'No disponible' : getButtonText(producto.id!) }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
 </main>

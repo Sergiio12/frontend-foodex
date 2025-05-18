@@ -217,6 +217,99 @@
   font-size: 1.1rem;
 }
 
+.user-add-to-cart {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  right: 120px; /* Espacio para los botones de admin */
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-to-cart-button {
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 8px; 
+  font-weight: 600;
+  font-size: 0.9rem; 
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px; 
+}
+
+.add-to-cart-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+}
+
+.add-to-cart-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.add-to-cart-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  opacity: 0.8;
+  transform: none;
+  box-shadow: none;
+}
+
+.admin-buttons-container {
+  bottom: 23px;
+  right: 15px;
+}
+
+.card-content {
+  padding-bottom: 80px; 
+}
+
+/* Estado vacío: mensaje centrado y botón */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;        /* Ocupa un espacio suficiente */
+  text-align: center;
+  background: #ffffff;
+  border: 2px dashed #bdc3c7;
+  border-radius: 12px;
+  margin: 2rem 1rem;
+  padding: 2rem;
+  color: #7f8c8d;
+}
+
+.empty-state p {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state .create-first-button {
+  padding: 0.75rem 1.5rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.empty-state .create-first-button:hover {
+  background: #318cd0;
+}
+
+
 /* Responsive - Adaptado */
 @media (max-width: 768px) {
   .grid-container {
@@ -247,6 +340,27 @@
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  .user-add-to-cart {
+    right: 15px; /* Ocupar todo el ancho */
+    left: 15px;
+    bottom: 60px; /* Espacio para botones de admin debajo */
+  }
+  
+  .admin-buttons-container {
+    bottom: 15px;
+    top: auto;
+  }
+  
+  .add-to-cart-button {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+  
+  .card-content {
+    padding-bottom: 100px; /* Más espacio en móviles */
+  }
+
 }
 
 /* Animaciones y utilidades - Mantenidas */

@@ -1,4 +1,5 @@
 <main class="main-content">
+  <!-- Botón flotante de creación solo para admins -->
   <button *ngIf="hasAdminRole()" 
           class="floating-create-button"
           (click)="openCreateCategoriaModal()"
@@ -8,8 +9,8 @@
     </svg>
   </button>
 
+  <!-- Modales de carga y error -->
   <app-loading-modal *ngIf="isLoading"></app-loading-modal>
-
   <app-error-modal 
     *ngIf="errorMessage && !isLoading"
     [errorMessage]="errorMessage"
@@ -17,62 +18,73 @@
     (close)="onCloseErrorModal()">
   </app-error-modal>
 
-  <div *ngIf="!isLoading && !errorMessage" class="categorias-grid">
-    <div class="section-header">
-      <h1 class="section-title">Explora Nuestras Categorías</h1>
-      <p class="section-subtitle">Descubre una selección única de productos cuidadosamente seleccionados</p>
+  <!-- Si no hay categorías, mostramos mensaje -->
+  <ng-container *ngIf="!isLoading && !errorMessage">
+    <div *ngIf="categorias.length === 0" class="empty-state">
+      <p>No se ha encontrado ninguna categoría.</p>
+      <button *ngIf="hasAdminRole()" (click)="openCreateCategoriaModal()">
+        Crear primera categoría
+      </button>
     </div>
-    
-    <div class="grid-container">
-      <article class="categoria-card" 
-           *ngFor="let categoria of categorias"
-           (mouseenter)="hoverState = categoria.id!"
-           (mouseleave)="hoverState = null"
-           [class.card-hover]="hoverState === categoria.id">
-        <div class="card-inner">
-          <div class="image-wrapper">
-            <img [src]="getImageUrl(categoria) || 'assets/images/placeholder-category.jpg'" 
-                 [alt]="categoria.nombre" 
-                 class="categoria-image"
-                 [class.image-zoom]="hoverState === categoria.id"
-                 loading="eager">
-            <div class="image-overlay"></div>
-          </div>
-          
-          <div class="card-content">
-            <div class="text-content">
-              <h3 class="categoria-title">{{ categoria.nombre }}</h3>
-              <p class="categoria-description">{{ categoria.descripcion }}</p>
+
+    <!-- Grid de categorías -->
+    <div *ngIf="categorias.length > 0" class="categorias-grid">
+      <div class="section-header">
+        <h1 class="section-title">Explora Nuestras Categorías</h1>
+        <p class="section-subtitle">
+          Descubre una selección única de productos cuidadosamente seleccionados
+        </p>
+      </div>
+      
+      <div class="grid-container">
+        <article class="categoria-card" 
+                 *ngFor="let categoria of categorias"
+                 (mouseenter)="hoverState = categoria.id!"
+                 (mouseleave)="hoverState = null"
+                 [class.card-hover]="hoverState === categoria.id">
+          <div class="card-inner">
+            <div class="image-wrapper">
+              <img [src]="getImageUrl(categoria) || 'assets/images/placeholder-category.jpg'" 
+                   [alt]="categoria.nombre" 
+                   class="categoria-image"
+                   [class.image-zoom]="hoverState === categoria.id"
+                   loading="eager">
+              <div class="image-overlay"></div>
             </div>
             
-            <button class="explore-button" 
-                    (click)="verProductos(categoria.id!)">
-              Ver productos
-              <svg class="arrow-icon" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.4 1.4l7.9-7.9l-7.9-7.9l-1.4 1.4L16 11H4"/>
-              </svg>
-            </button>
-            
-            <div class="admin-buttons-container">
-              <button *ngIf="hasAdminRole()" 
-                      class="admin-button edit-button" 
-                      (click)="editCategoria(categoria)">
-                <svg class="admin-icon edit-icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3c-.4-.4-1-.4-1.4 0l-1.8 1.8L19 8.1M3 17.2V21h3.8l11-11.1l-3.7-3.8L3 17.2"/>
+            <div class="card-content">
+              <div class="text-content">
+                <h3 class="categoria-title">{{ categoria.nombre }}</h3>
+                <p class="categoria-description">{{ categoria.descripcion }}</p>
+              </div>
+              
+              <button class="explore-button" 
+                      (click)="verProductos(categoria.id!)">
+                Ver productos
+                <svg class="arrow-icon" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.4 1.4l7.9-7.9l-7.9-7.9l-1.4 1.4L16 11H4"/>
                 </svg>
               </button>
               
-              <button *ngIf="hasAdminRole()" 
-                      class="admin-button delete-button" 
-                      (click)="deleteCategoria(categoria)">
-                <svg class="admin-icon trash-icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
-              </button>
+              <div class="admin-buttons-container" *ngIf="hasAdminRole()">
+                <button class="admin-button edit-button" 
+                        (click)="editCategoria(categoria)">
+                  <svg class="admin-icon edit-icon" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3c-.4-.4-1-.4-1.4 0l-1.8 1.8L19 8.1M3 17.2V21h3.8l11-11.1l-3.7-3.8L3 17.2"/>
+                  </svg>
+                </button>
+                
+                <button class="admin-button delete-button" 
+                        (click)="deleteCategoria(categoria)">
+                  <svg class="admin-icon trash-icon" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </div>
     </div>
-  </div>
+  </ng-container>
 </main>
