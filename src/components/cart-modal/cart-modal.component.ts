@@ -2,7 +2,7 @@ import { Component, EventEmitter, Output, HostListener, OnInit, OnDestroy, Injec
 import { ProductosService } from '../../services/productos.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, takeUntil, catchError, throwError, filter, map, distinctUntilChanged, take, shareReplay, finalize, tap, combineLatest } from 'rxjs';
+import { Observable, Subject, takeUntil, catchError, throwError, filter, map, distinctUntilChanged, take, shareReplay, tap, combineLatest } from 'rxjs';
 import { ItemCarrito } from '../../model/ItemCarrito';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { isEqual } from 'lodash';
@@ -23,17 +23,13 @@ import { CompraRequestDTO } from '../../model/CompraRequestDTO';
 })
 export class CartModalComponent implements OnInit, OnDestroy {
   @Output() closeModal = new EventEmitter<void>();
-  
 
   showCheckout = false;
   checkoutLoading = false;
   checkoutError: string | null = null;
 
   defaultImage = 'assets/default-product.png';
-  combinedData$!: Observable<{
-    cart: ApiResponseBody<CarritoResponse> | null;
-    loading: boolean;
-  }>;
+  cart$!: Observable<ApiResponseBody<CarritoResponse> | null>;
 
   private destroy$ = new Subject<void>();
 
@@ -48,7 +44,7 @@ export class CartModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeCart();
-    this.initializeCombinedData();
+    this.cart$ = this.cartService.cart$;
   }
 
   ngOnDestroy(): void {
@@ -56,19 +52,18 @@ export class CartModalComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  iniciarCheckout() {
+  iniciarCheckout(): void {
     this.showCheckout = true;
-  } 
+  }
 
   updateQuantity(productId: number, newQuantity: number): void {
     if (newQuantity < 0 || newQuantity === this.getCurrentQuantity(productId)) return;
 
-    this.cartService.setLoading(true);
-    
-    this.cartService.modifyItem(productId, newQuantity).pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.cartService.setLoading(false))
-    ).subscribe();
+    this.cartService.modifyItem(productId, newQuantity)
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
 
   getProductImage(item: ItemCarrito): string {
@@ -93,16 +88,15 @@ export class CartModalComponent implements OnInit, OnDestroy {
   }
 
   removeItem(productId: number): void {
-    this.cartService.setLoading(true); 
-    
-    this.cartService.removeItem(productId).pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.cartService.setLoading(false)),
-      catchError(error => {
-        console.error('Error eliminando ítem:', error);
-        return throwError(() => error);
-      })
-    ).subscribe();
+    this.cartService.removeItem(productId)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error eliminando ítem:', error);
+          return throwError(() => error);
+        })
+      )
+      .subscribe();
   }
 
   trackByProductId(index: number, item: ItemCarrito): number {
@@ -115,24 +109,26 @@ export class CartModalComponent implements OnInit, OnDestroy {
 
   navigateToCheckout(): void {
     this.close();
-    this.cartService.cart$.pipe(
-      take(1),
-      filter(res => !!res?.data),
-      map(res => res!.data)
-    ).subscribe(cartData => {
-      this.router.navigate(['/checkout'], {
-        state: { 
-          cart: cartData,
-          total: this.cartService.currentTotal 
-        }
+    this.cartService.cart$
+      .pipe(
+        take(1),
+        filter(res => !!res?.data),
+        map(res => res!.data)
+      )
+      .subscribe(cartData => {
+        this.router.navigate(['/checkout'], {
+          state: {
+            cart: cartData,
+            total: this.cartService.currentTotal
+          }
+        });
       });
-    });
   }
 
-  finalizarCompra(datos: CompraRequestDTO) {
+  finalizarCompra(datos: CompraRequestDTO): void {
     this.checkoutLoading = true;
     this.checkoutError = null;
-    
+
     this.compraService.realizarCompra(datos).subscribe({
       next: () => {
         this.cartService.clearCart();
@@ -145,9 +141,9 @@ export class CartModalComponent implements OnInit, OnDestroy {
       },
       complete: () => this.checkoutLoading = false
     });
-}
+  }
 
-  cerrarCheckout() {
+  cerrarCheckout(): void {
     this.showCheckout = false;
   }
 
@@ -162,32 +158,20 @@ export class CartModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  private initializeCombinedData(): void {
-  this.combinedData$ = combineLatest({
-    cart: this.cartService.cart$.pipe(
-      shareReplay({ bufferSize: 1, refCount: true }),
-      distinctUntilChanged((prev, curr) => isEqual(prev?.data?.itemsCarrito, curr?.data?.itemsCarrito))
-    ),
-    loading: this.cartService.isLoading$.pipe(
-      distinctUntilChanged()
-    )
-  }).pipe(
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
-}
-
   private initializeCart(): void {
-    this.cartService.getCart().pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error inicializando carrito:', error);
-        return throwError(() => new Error('No se pudo cargar el carrito.'));
-      })
-    ).subscribe();
+    this.cartService.getCart()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error inicializando carrito:', error);
+          return throwError(() => new Error('No se pudo cargar el carrito.'));
+        })
+      )
+      .subscribe();
   }
 
   private getCurrentQuantity(productId: number): number {
-    const currentCart = this.cartService.cartSubject.value?.data?.itemsCarrito;
+    const currentCart = this.cartService['cartSubject'].value?.data?.itemsCarrito;
     return currentCart?.find(i => i.producto.id === productId)?.cantidad || 0;
   }
 }

@@ -1,4 +1,4 @@
-/* Overlay que cubre todo el viewport */
+/* Estilos base del modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -11,7 +11,6 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Contenedor principal del modal */
 .modal-content {
   background: #ffffff;
   border-radius: 1rem;
@@ -19,99 +18,169 @@
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 2.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
   animation: slideUp 0.4s cubic-bezier(0.25, 1.25, 0.5, 1) forwards;
 }
 
-/* Título y total */
+/* Tipografía */
 h2 {
-  font-size: 2.25rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
   color: #2c3e50;
   text-align: center;
+  margin: 0;
+  line-height: 1.2;
 }
+
 .total-display {
   font-size: 1.25rem;
-  margin-bottom: 2rem;
+  color: #27ae60;
   text-align: center;
   font-weight: 600;
-  color: #16a085;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 1rem;
 }
 
-/* Sección de formularios en grid */
+h3.text-black {
+  font-size: 1.1rem;
+  color: #34495e;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+/* Estructura del formulario */
 .form-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
-/* Grupos de entrada */
 .input-group {
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  margin-bottom: 1.25rem;
 }
+
 .input-group label {
+  display: block;
   margin-bottom: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #34495e;
   font-weight: 500;
 }
+
+/* Campos de entrada */
 .input-group input,
 .input-group textarea {
-  padding: 0.75rem 1rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
   font-size: 1rem;
-  border: 1px solid #bdc3c7;
-  border-radius: 0.5rem;
-  transition: border-color 0.2s;
+  border: 2px solid #dfe6e9;
+  border-radius: 0.75rem;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
 }
+
 .input-group input:focus,
 .input-group textarea:focus {
   outline: none;
-  border-color: #2980b9;
-  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+  border-color: #3498db;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
+
+/* Campos inválidos */
+.input-group input.invalid,
+.input-group textarea.invalid {
+  border-color: #e74c3c;
+  background: #fff8f8;
+  animation: shake 0.4s ease;
+}
+
+.input-group input.invalid:focus,
+.input-group textarea.invalid:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Mensajes de error */
+.error-message {
+  color: #e74c3c;
+  font-size: 0.825rem;
+  margin-top: 0.5rem;
+  padding-left: 1.75rem;
+  position: relative;
+  opacity: 0;
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.error-message::before {
+  content: '⚠';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1em;
+}
+
+/* Textarea específico */
 textarea {
   min-height: 120px;
   resize: vertical;
+  line-height: 1.5;
 }
 
-/* Acciones: botones */
+/* Botones */
 .modal-actions {
-  margin-top: auto;
   display: flex;
-  justify-content: flex-end;
   gap: 1rem;
-  padding-top: 2rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }
+
 .btn-cancel,
 .btn-confirm {
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.75rem;
   font-size: 1rem;
+  font-weight: 500;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+
 .btn-cancel {
   background: #e74c3c;
-  color: #fff;
+  color: white;
 }
+
+.btn-cancel:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
 .btn-confirm {
   background: #27ae60;
-  color: #fff;
+  color: white;
 }
-.btn-cancel:hover,
+
 .btn-confirm:hover:not([disabled]) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: #219a52;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
 }
+
 .btn-confirm:disabled {
-  background: #95a5a6;
+  background: #bdc3c7;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* Animaciones */
@@ -119,20 +188,74 @@ textarea {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
+  from { transform: translateY(30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-4px); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .modal-content {
     padding: 1.5rem;
-    width: 95vw;
+    max-width: 95vw;
   }
-  h2 { font-size: 1.75rem; }
-  .total-display { font-size: 1.1rem; }
-  .modal-actions { flex-direction: column; align-items: stretch; }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  .form-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+  
   .btn-cancel,
-  .btn-confirm { width: 100%; }
+  .btn-confirm {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .input-group input,
+  .input-group textarea {
+    padding: 0.75rem;
+  }
+  
+  .btn-cancel,
+  .btn-confirm {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Estilos especiales para campos con patrón inválido */
+.input-group input:not(:placeholder-shown):invalid:not(:focus) {
+  border-color: #f1c40f;
+  background: #fffceb;
+}
+
+.input-group input:not(:placeholder-shown):invalid:not(:focus) + .error-message {
+  color: #f1c40f;
+}
+
+.input-group input:not(:placeholder-shown):invalid:not(:focus) + .error-message::before {
+  content: '⚠';
 }

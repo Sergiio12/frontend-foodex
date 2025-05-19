@@ -7,57 +7,144 @@
       <div class="form-section">
         <!-- Sección Dirección -->
         <div formGroupName="direccion">
-          <h3>Dirección de Entrega</h3>
+          <h3 class="text-black">Dirección de Entrega</h3>
+
+          <!-- Provincia -->
           <div class="input-group">
-            <label for="calle">Calle y número</label>
-            <input id="calle" formControlName="calle" placeholder="Ej: Avenida del Comercio 123">
+            <label for="provincia">Provincia</label>
+            <input id="provincia" formControlName="provincia" 
+                   placeholder="Ej: Madrid"
+                   maxlength="25">
           </div>
+
+          <!-- Calle -->
           <div class="input-group">
-            <label for="codPostal">Código Postal</label>
-            <input id="codPostal" formControlName="codPostal" placeholder="Ej: 28001">
+            <label for="calle">Calle *</label>
+            <input id="calle" formControlName="calle" 
+                   placeholder="Ej: Calle Gran Vía 123"
+                   maxlength="50"
+                   required
+                   [class.invalid]="calle?.invalid && (calle?.touched || submitted)">
+            <div class="error-message" 
+                 *ngIf="calle?.invalid && (calle?.touched || submitted)">
+              <span *ngIf="calle?.errors?.['required']">La calle es obligatoria</span>
+              <span *ngIf="calle?.errors?.['maxlength']">
+                Máximo {{calle?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
+            </div>
           </div>
+
+          <!-- Código Postal -->
           <div class="input-group">
-            <label for="bloque">Bloque/Edificio</label>
-            <input id="bloque" formControlName="bloque" placeholder="Ej: Edificio Centro">
+            <label for="codPostal">Código Postal *</label>
+            <input id="codPostal" formControlName="codPostal" 
+                   placeholder="Ej: 28001"
+                   maxlength="10"
+                   required
+                   [class.invalid]="codPostal?.invalid && (codPostal?.touched || submitted)">
+            <div class="error-message" 
+                 *ngIf="codPostal?.invalid && (codPostal?.touched || submitted)">
+              <span *ngIf="codPostal?.errors?.['required']">Campo obligatorio</span>
+              <span *ngIf="codPostal?.errors?.['pattern']">Debe tener 5 dígitos</span>
+              <span *ngIf="codPostal?.errors?.['maxlength']">
+                Máximo {{codPostal?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
+            </div>
           </div>
+
+          <!-- Bloque -->
           <div class="input-group">
-            <label for="portal">Portal</label>
-            <input id="portal" formControlName="portal" placeholder="Ej: Portal 4">
+            <label for="bloque">Bloque *</label>
+            <input id="bloque" formControlName="bloque" 
+                   placeholder="Ej: 2B"
+                   maxlength="5"
+                   required
+                   [class.invalid]="bloque?.invalid && (bloque?.touched || submitted)">
+            <div class="error-message" 
+                 *ngIf="bloque?.invalid && (bloque?.touched || submitted)">
+              <span *ngIf="bloque?.errors?.['required']">Campo obligatorio</span>
+              <span *ngIf="bloque?.errors?.['maxlength']">
+                Máximo {{bloque?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
+            </div>
           </div>
+
+          <!-- Portal -->
           <div class="input-group">
-            <label for="ciudad">Ciudad</label>
-            <input id="ciudad" formControlName="ciudad" placeholder="Ej: Madrid">
-          </div>
-          <div class="input-group">
-            <label for="pais">País</label>
-            <input id="pais" formControlName="pais" placeholder="Ej: España">
+            <label for="portal">Portal *</label>
+            <input id="portal" formControlName="portal" 
+                   placeholder="Ej: 4"
+                   maxlength="5"
+                   required
+                   [class.invalid]="portal?.invalid && (portal?.touched || submitted)">
+            <div class="error-message" 
+                 *ngIf="portal?.invalid && (portal?.touched || submitted)">
+              <span *ngIf="portal?.errors?.['required']">Campo obligatorio</span>
+              <span *ngIf="portal?.errors?.['maxlength']">
+                Máximo {{portal?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
+            </div>
           </div>
         </div>
 
         <!-- Sección Contacto -->
         <div formGroupName="datosContacto">
-          <h3>Datos de Contacto</h3>
+          <h3 class="text-black">Datos de Contacto</h3>
+
+          <!-- Teléfono -->
           <div class="input-group">
-            <label for="telefono">Teléfono móvil</label>
-            <input id="telefono" formControlName="telefono" placeholder="Ej: +34 612 345 678">
+            <label for="telefono">Teléfono *</label>
+            <input id="telefono" formControlName="telefono" 
+                   placeholder="Ej: +34612345678"
+                   maxlength="15"
+                   required
+                   [class.invalid]="telefono?.invalid && (telefono?.touched || submitted)">
+            <div class="error-message" 
+                 *ngIf="telefono?.invalid && (telefono?.touched || submitted)">
+              <span *ngIf="telefono?.errors?.['required']">Campo obligatorio</span>
+              <span *ngIf="telefono?.errors?.['pattern']">Formato inválido</span>
+              <span *ngIf="telefono?.errors?.['maxlength']">
+                Máximo {{telefono?.errors?.['maxlength']?.requiredLength}} caracteres
+              </span>
+            </div>
           </div>
+
+          <!-- Email -->
           <div class="input-group">
-            <label for="email">Correo electrónico</label>
-            <input id="email" formControlName="email" placeholder="Ej: contacto@ejemplo.com">
+            <label for="email">Email</label>
+            <input id="email" formControlName="email" 
+                   placeholder="Ej: ejemplo@email.com"
+                   maxlength="50"
+                   [class.invalid]="email?.invalid && email?.touched">
+            <div class="error-message" 
+                 *ngIf="email?.invalid && email?.touched">
+              <span *ngIf="email?.errors?.['email']">Email inválido</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Comentarios -->
+      <!-- Comentario -->
       <div class="input-group">
         <label for="comentario">Comentarios adicionales</label>
-        <textarea id="comentario" formControlName="comentario" placeholder="Detalles importantes para la entrega (ej: código de acceso, horario preferente, etc.)"></textarea>
+        <textarea id="comentario" formControlName="comentario" 
+                  placeholder="Detalles importantes para la entrega..."
+                  maxlength="250"
+                  [class.invalid]="comentario?.invalid && comentario?.touched"></textarea>
+        <div class="error-message" 
+             *ngIf="comentario?.invalid && comentario?.touched">
+          <span *ngIf="comentario?.errors?.['maxlength']">
+            Máximo {{comentario?.errors?.['maxlength']?.requiredLength}} caracteres
+          </span>
+        </div>
       </div>
 
       <!-- Acciones -->
       <div class="modal-actions">
         <button type="button" class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
-        <button type="submit" class="btn-confirm" [disabled]="!checkoutForm.valid">Confirmar Compra</button>
+        <button type="submit" class="btn-confirm" [disabled]="!checkoutForm.valid">
+          Confirmar Compra
+        </button>
       </div>
     </form>
   </div>

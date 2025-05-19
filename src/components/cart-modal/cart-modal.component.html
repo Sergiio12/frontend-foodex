@@ -12,15 +12,12 @@
       <div class="cart-body">
         <ng-container *ngIf="{ 
           cart: cartService.cart$ | async, 
-          loading: cartService.isLoading$ | async,
           total: cartService.totalPrice$ | async
         } as data">
 
           <!-- Cargando -->
-          <div *ngIf="data.loading" class="loading">Cargando...</div>
 
           <!-- Contenido del carrito -->
-          <ng-container *ngIf="!data.loading">
             <ng-container *ngIf="data.cart?.data?.itemsCarrito?.length; else emptyCart">
               <div class="scrollable-products">
                 <div class="cart-items">
@@ -53,8 +50,6 @@
                     <button class="remove-btn"
                             (click)="removeItem(item.producto.id!)"
                             aria-label="Eliminar producto">
-                      <!-- (SVG de papelera) -->
-                      &times;
                     </button>
                   </div>
                 </div>
@@ -91,7 +86,6 @@
               </div>
             </ng-template>
           </ng-container>
-        </ng-container>
       </div>
     </div>
   </div>
