@@ -1,1 +1,49 @@
-<p>administracion works!</p>
+<div class="container">
+  <h2>Historial de Compras</h2>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Contacto</th>
+        <th>Dirección</th>
+        <th>Estado</th>
+        <th>Monto</th>
+        <th>Fecha/Hora</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let compra of compras">
+        <td>{{ compra.id }}</td>
+        <td>
+          {{ compra.usuarioDTO.nombre }} 
+          {{ compra.usuarioDTO.apellido1 }}
+          {{ compra.usuarioDTO.apellido2 }}
+        </td>
+        <td>
+          <div>{{ compra.usuarioDTO.datosContacto.telefono }}</div>
+          <div>{{ compra.usuarioDTO.datosContacto.email }}</div>
+        </td>
+        <td>
+          {{ compra.usuarioDTO.direccion.calle }}, 
+          {{ compra.usuarioDTO.direccion.bloque }}
+          {{ compra.usuarioDTO.direccion.portal }}, 
+          {{ compra.usuarioDTO.direccion.codPostal }} 
+          {{ compra.usuarioDTO.direccion.provincia }}
+        </td>
+        <td>
+          <span [class]="'status-badge status-' + compra.estadoCompra.toLowerCase()">
+            {{ compra.estadoCompra }}
+          </span>
+        </td>
+        <td>{{ compra.monto | currency:'EUR':'symbol':'1.2-2' }}</td>
+        <td>{{ compra.fechaHora | date:'dd/MM/yyyy HH:mm' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,5 +1,5 @@
 export enum EstadoCompra {
   PENDIENTE = 'PENDIENTE',
-  COMPLETADA = 'COMPLETADA',
+  PAGADA = 'PAGADA',
   CANCELADA = 'CANCELADA'
 }

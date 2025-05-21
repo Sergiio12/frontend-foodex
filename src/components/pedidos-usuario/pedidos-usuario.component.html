@@ -1,0 +1,63 @@
+<div class="container">
+  <h2 class="page-title">Mis Pedidos</h2>
+
+  <ng-container *ngIf="errorMessage; else loadingOrContent">
+    <div class="alert error-alert">
+      <span class="alert-icon">!</span>
+      {{ errorMessage }}
+    </div>
+  </ng-container>
+
+  <ng-template #loadingOrContent>
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p class="loading-text">Cargando tu historial de pedidos...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+      <div *ngIf="compras.length === 0; else ordersList" class="empty-state">
+        <p class="empty-text">Aún no tienes pedidos realizados</p>
+        <a routerLink="/productos" class="primary-button">
+          <i class="fas fa-utensils"></i>
+          Ver productos disponibles
+        </a>
+      </div>
+
+      <ng-template #ordersList>
+        <div class="orders-container">
+          <div class="order-card" *ngFor="let compra of compras">
+            <div class="order-header">
+              <div class="order-meta">
+                <span class="order-number">Pedido #{{ compra.id }}</span>
+                <span class="order-date">{{ compra.fechaHora | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <span class="order-status" [class]="getStatusClass(compra.estadoCompra)">
+                {{ compra.estadoCompra | titlecase }}
+              </span>
+            </div>
+
+            <div class="order-body">
+              <div class="order-details">
+                <div class="detail-item">
+                  <i class="fas fa-receipt"></i>
+                  <span class="detail-label">Total:</span>
+                  <span class="detail-value">{{ compra.monto | currency:'EUR':'symbol':'1.2-2' }}</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span class="detail-label">Dirección:</span>
+                  <span class="detail-value">
+                    {{ compra.usuarioDTO.direccion.calle }}, 
+                    {{ compra.usuarioDTO.direccion.bloque }} -
+                    {{ compra.usuarioDTO.direccion.portal }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
+  </ng-template>
+</div>
