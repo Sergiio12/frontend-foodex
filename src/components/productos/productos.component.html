@@ -64,7 +64,9 @@
                   <div class="producto-info">
                     <div class="price-stock">
                       <span class="price">€{{ producto.precio | number:'1.2-2' }}</span>
-                      <span class="stock">{{ producto.stock }} unidades</span>
+                      <span class="stock" [class.no-stock]="producto.stock === 0">
+                        {{ producto.stock === 0 ? 'Sin stock' : producto.stock + ' unidades' }}
+                      </span>
                     </div>
                     <span class="status-tag"
                           [class.descatalogado]="producto.descatalogado"

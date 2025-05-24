@@ -309,6 +309,10 @@
   background: #318cd0;
 }
 
+.no-stock {
+  color: #ff4444; /* Rojo suave */
+  font-weight: 500;
+}
 
 /* Responsive - Adaptado */
 @media (max-width: 768px) {
