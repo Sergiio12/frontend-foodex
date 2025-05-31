@@ -1,0 +1,1 @@
+export const URL_SERVIDOR = 'https://hood-concerned-farmers-mustang.trycloudflare.com' + '/';

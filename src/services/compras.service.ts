@@ -5,10 +5,11 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { CompraDTO } from '../model/CompraDTO';
 import { CompraRequestDTO } from '../model/CompraRequestDTO';
 import { AuthService } from './auth.service';
+import { URL_SERVIDOR } from '../utils/constantes';
 
 @Injectable({ providedIn: 'root' })
 export class CompraService {
-  private apiUrl = 'http://localhost:8080/api/compras';
+  private apiUrl = URL_SERVIDOR + 'api/compras';
 
   constructor(
     private http: HttpClient,

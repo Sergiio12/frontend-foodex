@@ -6,11 +6,12 @@ import { Categoria } from '../model/Categoria';
 import { AuthService } from './auth.service';
 import { ApiResponseBody } from '../model/ApiResponseBody';
 import { ImagenOrigen } from '../model/ImagenOrigen';
+import { URL_SERVIDOR } from '../utils/constantes';
 
 @Injectable({ providedIn: 'root' })
 export class CategoriasService {
-  private readonly apiUrl = 'http://localhost:8080/api/categorias';
-  private readonly imagenBaseUrl = 'http://localhost:8080/api/images';
+  private readonly apiUrl = URL_SERVIDOR + 'api/categorias';
+  private readonly imagenBaseUrl = URL_SERVIDOR + 'api/images';
 
   constructor(
     private http: HttpClient,

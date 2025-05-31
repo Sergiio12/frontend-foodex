@@ -6,12 +6,13 @@ import { catchError, tap } from 'rxjs/operators';
 import { LoginRequest } from '../payloads/LoginRequest';
 import { SignupRequest } from '../payloads/SignupRequest';
 import { ApiResponseBody } from '../model/ApiResponseBody';
+import { URL_SERVIDOR } from '../utils/constantes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api/auth';
+  private readonly API_URL = URL_SERVIDOR + 'api/auth';
   private readonly TOKEN_KEY = 'authToken';
   private authStatus = new BehaviorSubject<boolean>(this.isValidToken(this.getToken()));
 

@@ -6,15 +6,14 @@ import { AuthService } from './auth.service';
 import { ApiResponseBody } from '../model/ApiResponseBody';
 import { CarritoResponse } from '../payloads/CarritoResponse';
 import { isEqual } from 'lodash';
+import { URL_SERVIDOR } from '../utils/constantes';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private readonly API_URL = 'http://localhost:8080/api/carrito';
+  private readonly API_URL = URL_SERVIDOR + 'api/carrito';
 
-  // BehaviorSubject que mantiene el último estado del carrito
   private cartSubject = new BehaviorSubject<ApiResponseBody<CarritoResponse> | null>(null);
 
-  // Observable público transformado y cacheado
   cart$ = this.cartSubject.asObservable().pipe(
     map(res => res ? {
       status: res.status,
@@ -26,13 +25,11 @@ export class CartService {
     shareReplay(1)
   );
 
-  // Cálculo del precio total
   totalPrice$ = this.cart$.pipe(
     map(res => res?.data?.itemsCarrito.reduce((sum, item) => sum + item.producto.precio * item.cantidad, 0) || 0),
     distinctUntilChanged()
   );
 
-  // Conteo de ítems únicos
   uniqueItemsCount$ = this.cart$.pipe(
     map(res => res?.data?.itemsCarrito.length || 0),
     distinctUntilChanged()
@@ -43,13 +40,11 @@ export class CartService {
     private authService: AuthService
   ) {}
 
-  // Getter para acceder al total sincrónico
   get currentTotal(): number {
     const res = this.cartSubject.value;
     return res?.data?.itemsCarrito.reduce((sum, item) => sum + item.producto.precio * item.cantidad, 0) || 0;
   }
 
-  /** Obtiene el carrito desde la API y actualiza el BehaviorSubject */
   getCart(): Observable<ApiResponseBody<CarritoResponse>> {
     return this.http
       .get<ApiResponseBody<CarritoResponse>>(this.API_URL, { headers: this.authHeaders })
@@ -63,7 +58,6 @@ export class CartService {
       );
   }
 
-  /** Añade un ítem al carrito */
   addItem(productId: number, cantidad: number): Observable<ApiResponseBody<CarritoResponse>> {
     const params = new HttpParams()
       .set('idProducto', productId.toString())
@@ -79,7 +73,6 @@ export class CartService {
           if (response.status === 'success') {
             const validated = this.validateCart(response);
             this.cartSubject.next(validated);
-            // Forzamos recarga para refrescar badge u otros componentes dependientes
             window.location.reload();
           }
         }),
@@ -87,9 +80,7 @@ export class CartService {
       );
   }
 
-  /** Modifica la cantidad de un ítem (optimista) */
   modifyItem(productId: number, nuevaCantidad: number): Observable<ApiResponseBody<CarritoResponse>> {
-    // Optimistic update
     const currentCart = this.cartSubject.value;
     if (currentCart?.data) {
       const updatedItems = currentCart.data.itemsCarrito.map(item =>
@@ -114,7 +105,6 @@ export class CartService {
       .pipe(
         tap(response => this.handleCartResponse(response)),
         catchError(err => {
-          // Revertir optimismo en caso de error
           if (currentCart) {
             this.cartSubject.next(currentCart);
           }
@@ -123,7 +113,6 @@ export class CartService {
       );
   }
 
-  /** Elimina un ítem del carrito */
   removeItem(productId: number): Observable<ApiResponseBody<CarritoResponse>> {
     const params = new HttpParams().set('idProducto', productId.toString());
     return this.http
@@ -137,7 +126,6 @@ export class CartService {
       );
   }
 
-  /** Vacía todo el carrito */
   clearCart(): Observable<ApiResponseBody<CarritoResponse>> {
     return this.http
       .delete<ApiResponseBody<CarritoResponse>>(`${this.API_URL}/vaciar`, {
@@ -149,7 +137,6 @@ export class CartService {
       );
   }
 
-  /** Construye los headers de autenticación */
   private get authHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     if (!token) {
@@ -158,7 +145,6 @@ export class CartService {
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
-  /** Procesa la respuesta y actualiza el carrito si cambió */
   private handleCartResponse(response: ApiResponseBody<CarritoResponse>): void {
     if (response.status === 'success') {
       const validated = this.validateCart(response);
@@ -177,7 +163,6 @@ export class CartService {
     }
   }
 
-  /** Asegura que no haya ítems inválidos y recalcula total si hace falta */
   private validateCart(response: ApiResponseBody<CarritoResponse>): ApiResponseBody<CarritoResponse> {
     const safeData = response.data || { itemsCarrito: [], total: 0 };
     const validItems = safeData.itemsCarrito.filter(i => i.producto?.id && i.cantidad > 0);
@@ -189,7 +174,6 @@ export class CartService {
     };
   }
 
-  /** Manejo de errores estándar */
   private handleError(error: any): Observable<never> {
     if (error.status === 401) {
       this.authService.logout();

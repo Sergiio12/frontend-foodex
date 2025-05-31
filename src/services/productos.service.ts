@@ -6,11 +6,12 @@ import { Producto } from '../model/Producto';
 import { AuthService } from './auth.service';
 import { ApiResponseBody } from '../model/ApiResponseBody';
 import { ImagenOrigen } from '../model/ImagenOrigen';
+import { URL_SERVIDOR } from '../utils/constantes';
 
 @Injectable({ providedIn: 'root' })
 export class ProductosService {
-  private readonly apiUrl = 'http://localhost:8080/api/productos';
-  private readonly imagenBaseUrl = 'http://localhost:8080/api/images';
+  private readonly apiUrl = URL_SERVIDOR + 'api/productos';
+  private readonly imagenBaseUrl = URL_SERVIDOR + 'api/images';
 
   constructor(
     private http: HttpClient,
