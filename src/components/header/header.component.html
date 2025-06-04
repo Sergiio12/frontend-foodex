@@ -8,7 +8,6 @@
     </div>
 
     <div class="nav-right">
-      <!-- Icono del carrito -->
       <ng-container *ngIf="isLoggedIn">
         <div class="cart-container" 
              (click)="openCart()" 
@@ -28,7 +27,6 @@
         </div>
       </ng-container>
 
-      <!-- Menú de usuario -->
       <ng-container *ngIf="isLoggedIn; else loginTemplate">
         <div class="user-container" 
              (click)="toggleUserMenu()" 
@@ -43,7 +41,6 @@
             <path stroke="currentColor" stroke-width="2" d="M5 9l7 7 7-7"/>
           </svg>
           
-          <!-- Menú desplegable -->
           <div class="user-menu" 
                [class.active]="isUserMenuOpen"
                role="menu"
@@ -65,7 +62,6 @@
         </div>
       </ng-container>
 
-      <!-- Botón de login -->
       <ng-template #loginTemplate>
         <a routerLink="/login" 
            class="login-btn" 

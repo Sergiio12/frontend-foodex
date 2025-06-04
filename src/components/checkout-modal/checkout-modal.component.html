@@ -5,11 +5,9 @@
     
     <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
       <div class="form-section">
-        <!-- Sección Dirección -->
         <div formGroupName="direccion">
           <h3 class="text-black">Dirección de Entrega</h3>
 
-          <!-- Provincia -->
           <div class="input-group">
             <label for="provincia">Provincia</label>
             <input id="provincia" formControlName="provincia" 
@@ -17,7 +15,6 @@
                    maxlength="25">
           </div>
 
-          <!-- Calle -->
           <div class="input-group">
             <label for="calle">Calle *</label>
             <input id="calle" formControlName="calle" 
@@ -34,7 +31,6 @@
             </div>
           </div>
 
-          <!-- Código Postal -->
           <div class="input-group">
             <label for="codPostal">Código Postal *</label>
             <input id="codPostal" formControlName="codPostal" 
@@ -52,7 +48,6 @@
             </div>
           </div>
 
-          <!-- Bloque -->
           <div class="input-group">
             <label for="bloque">Bloque *</label>
             <input id="bloque" formControlName="bloque" 
@@ -69,7 +64,6 @@
             </div>
           </div>
 
-          <!-- Portal -->
           <div class="input-group">
             <label for="portal">Portal *</label>
             <input id="portal" formControlName="portal" 
@@ -87,11 +81,9 @@
           </div>
         </div>
 
-        <!-- Sección Contacto -->
         <div formGroupName="datosContacto">
           <h3 class="text-black">Datos de Contacto</h3>
 
-          <!-- Teléfono -->
           <div class="input-group">
             <label for="telefono">Teléfono *</label>
             <input id="telefono" formControlName="telefono" 
@@ -109,7 +101,6 @@
             </div>
           </div>
 
-          <!-- Email -->
           <div class="input-group">
             <label for="email">Email</label>
             <input id="email" formControlName="email" 
@@ -124,7 +115,6 @@
         </div>
       </div>
 
-      <!-- Comentario -->
       <div class="input-group">
         <label for="comentario">Comentarios adicionales</label>
         <textarea id="comentario" formControlName="comentario" 
@@ -139,7 +129,6 @@
         </div>
       </div>
 
-      <!-- Acciones -->
       <div class="modal-actions">
         <button type="button" class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
         <button type="submit" class="btn-confirm" [disabled]="!checkoutForm.valid">

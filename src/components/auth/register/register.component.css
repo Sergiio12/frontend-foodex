@@ -1,60 +1,36 @@
-:root {
-  --primary: #7d4aff;
-  --secondary: #00e0ff;
-  --accent: #ff6b6b;
-  --error: #ff4757;
-  --success: #2ecc71;
-  --background: #f8fafc;
-  --text: #2d3436;
-  --glass: rgba(255, 255, 255, 0.98);
-  --notification-height: 60px;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  --input-border: rgba(0, 0, 0, 0.1);
-  --input-focus: rgba(125, 74, 255, 0.2);
-  --spinner-color: white;
-}
-
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--background);
   margin: 0;
   padding: 0;
 }
 
-main {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding-bottom: 5rem;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8fafc;
+  color: #2d3436;
 }
 
 .register-container {
   display: flex;
-  min-height: 100vh;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  padding: 2rem;
-  padding-top: calc(var(--notification-height) + 2rem);
-  position: relative;
+  min-height: 100vh;
+  padding: calc(60px + 2rem) 2rem 2rem;
+  margin-top: -60px;
+  background: linear-gradient(135deg, #7d4aff, #00e0ff);
   overflow: hidden;
 }
 
 .register-card {
-  background: var(--glass);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   border-radius: 1.5rem;
   padding: 3rem 2.5rem;
-  width: 100%;
   max-width: 480px;
-  box-shadow: var(--shadow);
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.4);
   position: relative;
   overflow: hidden;
@@ -87,15 +63,13 @@ main {
 .register-header {
   text-align: center;
   margin-bottom: 2.5rem;
-  position: relative;
-  z-index: 1;
 }
 
 .title {
   font-size: 2.4rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(45deg, var(--primary), var(--secondary));
+  background: linear-gradient(45deg, #7d4aff, #00e0ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: #636e72;
@@ -114,16 +88,28 @@ main {
   gap: 2rem;
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Corrección específica para el error de contraseñas no coincidentes */
+.password-match-error {
+  grid-column: span 2;
+  margin-top: -1.5rem;
+  padding: 0;
+}
+
 .floating-label {
   position: relative;
   width: 100%;
-  margin-bottom: 20px;
 }
 
 .floating-label input {
   width: 100%;
   padding: 16px;
-  border: 2px solid var(--input-border);
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.95);
@@ -131,13 +117,15 @@ main {
 }
 
 .floating-label input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--input-focus);
+  border-color: #7d4aff;
+  box-shadow: 0 0 0 4px rgba(125, 74, 255, 0.2);
 }
 
+/* Estilos mejorados para errores */
 .floating-label input.invalid {
-  border-color: var(--error);
+  border-color: #ff4757;
   background: rgba(255, 235, 235, 0.9);
+  animation: shake 0.4s ease;
 }
 
 .floating-label label {
@@ -147,9 +135,9 @@ main {
   transform: translateY(-50%);
   color: #636e72;
   pointer-events: none;
-  transition: all 0.3s ease;
   background: transparent;
   padding: 0 0.4rem;
+  transition: all 0.3s ease;
   font-size: 0.95rem;
 }
 
@@ -158,12 +146,16 @@ main {
   top: -0.8rem;
   left: 0.9rem;
   font-size: 0.85rem;
-  color: var(--primary);
-  background: var(--glass);
+  color: #7d4aff;
+  background: rgba(255, 255, 255, 0.98);
   font-weight: 500;
 }
 
-.toggle-password {
+.password-group {
+  position: relative;
+}
+
+.password-group .toggle-password {
   position: absolute;
   right: 1.2rem;
   top: 50%;
@@ -172,24 +164,33 @@ main {
   border: none;
   color: #636e72;
   cursor: pointer;
-  transition: all 0.3s ease;
   padding: 0.3rem;
   z-index: 2;
+  transition: all 0.3s ease;
 }
 
-.toggle-password:hover {
-  color: blue;
+.password-group .toggle-password:hover {
   transform: translateY(-50%) scale(1.1);
+  color: blue;
 }
 
 .error-list {
   font-size: 0.8rem;
+  margin-top: 0.25rem;
+  list-style: none;
+  padding: 0;
 }
 
 .error-item {
   color: #ff4757;
-  margin-bottom: 0.5rem;
-  animation: shake 0.4s ease;
+  margin-top: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  animation: fadeIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 0.86rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.1);
+  border-left: 3px solid #ff4757;
 }
 
 @keyframes shake {
@@ -198,18 +199,14 @@ main {
   75% { transform: translateX(6px); }
 }
 
-.invalid {
-  border-color: var(--error);
-}
-
 .submit-btn {
   position: relative;
   width: 100%;
   padding: 1rem;
   border: none;
   border-radius: 0.9rem;
-  background: linear-gradient(45deg, var(--primary), var(--secondary));
-  color: white;
+  background: linear-gradient(45deg, #7d4aff, #00e0ff);
+  color: #fff;
   font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
@@ -253,10 +250,8 @@ main {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  --spinner-size: 28px;
-  width: var(--spinner-size);
-  height: var(--spinner-size);
-  display: inline-block;
+  width: 28px;
+  height: 28px;
 }
 
 .spinner-circle {
@@ -267,13 +262,12 @@ main {
   height: 100%;
   border: 3px solid transparent;
   border-radius: 50%;
-  border-top-color: var(--spinner-color);
+  border-top-color: white;
   animation: spin 1s linear infinite;
 }
 
 .spinner-circle:nth-child(2) {
-  border: 3px solid transparent;
-  border-right-color: var(--spinner-color);
+  border-right-color: white;
   animation: spin 1s linear infinite reverse;
 }
 
@@ -282,32 +276,18 @@ main {
   100% { transform: rotate(360deg); }
 }
 
-.submit-btn .btn-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.3s ease;
-}
-
-.submit-btn .hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
 .links {
-  margin-top: 1rem;
   text-align: center;
 }
 
 .links a {
-  color: var(--primary);
+  color: #7d4aff;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .links a:hover {
-  color: var(--secondary);
+  color: #00e0ff;
 }
 
 .global-notification {
@@ -323,7 +303,7 @@ main {
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.4);
   font-weight: 600;
@@ -341,41 +321,14 @@ main {
 
 .global-notification.success {
   background: linear-gradient(135deg, rgba(46, 204, 113, 0.95), rgba(46, 204, 113, 0.8));
-  color: white;
+  color: #fff;
   border-color: rgba(46, 204, 113, 0.7);
 }
 
 .global-notification.error {
   background: linear-gradient(135deg, rgba(255, 71, 87, 0.95), rgba(255, 71, 87, 0.8));
-  color: white;
+  color: #fff;
   border-color: rgba(255, 71, 87, 0.7);
-}
-
-@keyframes notificationSlide {
-  0% {
-    top: -100px;
-    opacity: 0;
-    transform: translateX(-50%) scale(0.9);
-  }
-  80% {
-    transform: translateX(-50%) scale(1.05);
-  }
-  100% {
-    top: 1.5rem;
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
-}
-
-@keyframes notificationOut {
-  0% {
-    top: 1.5rem;
-    opacity: 1;
-  }
-  100% {
-    top: -100px;
-    opacity: 0;
-  }
 }
 
 .global-notification::after {
@@ -384,20 +337,16 @@ main {
   bottom: 0;
   left: 0;
   height: 4px;
+  width: 100%;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 0 0 12px 12px;
-  width: 100%;
   transform-origin: left;
   animation: progressBar 4s linear forwards;
 }
 
 @keyframes progressBar {
-  0% {
-    transform: scaleX(1);
-  }
-  100% {
-    transform: scaleX(0);
-  }
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 .close-notification {
@@ -415,13 +364,24 @@ main {
   opacity: 0.8;
 }
 
+.password-match-error .error-item {
+    font-size: 0.8rem;
+  }
+
 @media (max-width: 768px) {
   .register-container {
     padding: 1.5rem;
   }
   .register-card {
-    width: 100%;
     max-width: 100%;
     padding: 2rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .password-match-error {
+    grid-column: span 1;
   }
 }

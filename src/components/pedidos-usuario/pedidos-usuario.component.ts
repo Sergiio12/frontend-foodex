@@ -84,7 +84,6 @@ export class PedidosUsuarioComponent implements OnInit {
   private extraerUsernameDelToken(token: string): string | null {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      // Ajusta según la estructura real de tu token
       return payload.username || payload.sub || null;
     } catch (e) {
       console.error('Error decodificando token:', e);

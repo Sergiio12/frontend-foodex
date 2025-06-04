@@ -85,7 +85,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   openCart(): void {
     if (this.isLoggedIn) {
-      this.openCartModal(); // Abrir modal en lugar de navegar
+      this.openCartModal(); 
     } else {
       this.router.navigate(['/login'], { 
         queryParams: { returnUrl: '/cart' } 

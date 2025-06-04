@@ -1,4 +1,3 @@
-<!-- == Modal Carrito == -->
 <ng-container *ngIf="!showCheckout">
   <div class="cart-modal-overlay" (click)="onBackgroundClick($event)">
     <div class="cart-modal-content" (click)="$event.stopPropagation()">
@@ -14,10 +13,6 @@
           cart: cartService.cart$ | async, 
           total: cartService.totalPrice$ | async
         } as data">
-
-          <!-- Cargando -->
-
-          <!-- Contenido del carrito -->
             <ng-container *ngIf="data.cart?.data?.itemsCarrito?.length; else emptyCart">
               <div class="scrollable-products">
                 <div class="cart-items">
@@ -76,7 +71,6 @@
               </div>
             </ng-container>
 
-            <!-- Carrito vacío -->
             <ng-template #emptyCart>
               <div class="empty-cart-message">
                 <p>Tu carrito está vacío</p>
@@ -91,7 +85,6 @@
   </div>
 </ng-container>
 
-<!-- == Modal Checkout == -->
 <ng-container *ngIf="showCheckout">
   <app-checkout-modal
     [total]="cartService.totalPrice$ | async"

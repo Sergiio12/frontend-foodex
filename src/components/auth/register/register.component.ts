@@ -6,6 +6,7 @@ import { AuthService } from '../../../services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { lastValueFrom } from 'rxjs';
+import { SignupRequest } from '../../../payloads/SignupRequest';
 
 @Component({
   selector: 'app-register',
@@ -37,12 +38,16 @@ export class RegisterComponent implements OnDestroy {
     private authService: AuthService,
     private router: Router
   ) {
+    // Actualizar el formulario con los campos necesarios para SignupRequest
     this.registerForm = this.fb.group(
       {
         username: ['', [Validators.required, Validators.minLength(4)]],
-        password: ['', [Validators.required, Validators.minLength(6)]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
+        name: ['', [Validators.required]], 
+        firstname: ['', [Validators.required]],
+        lastname: ['', [Validators.required]], 
       },
       {
         validators: this.passwordMatchValidator,
@@ -50,21 +55,13 @@ export class RegisterComponent implements OnDestroy {
     );
   }
 
-  get username() {
-    return this.registerForm.get('username')!;
-  }
-
-  get password() {
-    return this.registerForm.get('password')!;
-  }
-
-  get confirmPassword() {
-    return this.registerForm.get('confirmPassword')!;
-  }
-
-  get email() {
-    return this.registerForm.get('email')!;
-  }
+  get name() { return this.registerForm.get('name')!; }
+  get username() { return this.registerForm.get('username')!; }
+  get firstname() { return this.registerForm.get('firstname')!; }
+  get lastname() { return this.registerForm.get('lastname')!; }
+  get password() { return this.registerForm.get('password')!; }
+  get confirmPassword() { return this.registerForm.get('confirmPassword')!; }
+  get email() { return this.registerForm.get('email')!; }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -92,8 +89,17 @@ export class RegisterComponent implements OnDestroy {
     this.clearNotification();
 
     try {
+      const signupData: SignupRequest = {
+        username: this.registerForm.value.username,
+        email: this.registerForm.value.email,
+        password: this.registerForm.value.password,
+        name: this.registerForm.value.name,
+        firstname: this.registerForm.value.firstname,
+        lastname: this.registerForm.value.lastname
+      };
+
       const response = await lastValueFrom(
-        this.authService.register(this.registerForm.value)
+        this.authService.register(signupData)
       );
 
       this.showNotification('success', '¡Registro exitoso! Redirigiendo...');

@@ -1,5 +1,4 @@
 <main class="main-content">
-  <!-- Botón flotante de creación solo para admins -->
   <button *ngIf="hasAdminRole()" 
           class="floating-create-button"
           (click)="openCreateCategoriaModal()"
@@ -9,7 +8,6 @@
     </svg>
   </button>
 
-  <!-- Modales de carga y error -->
   <app-loading-modal *ngIf="isLoading"></app-loading-modal>
   <app-error-modal 
     *ngIf="errorMessage && !isLoading"
@@ -18,7 +16,6 @@
     (close)="onCloseErrorModal()">
   </app-error-modal>
 
-  <!-- Si no hay categorías, mostramos mensaje -->
   <ng-container *ngIf="!isLoading && !errorMessage">
     <div *ngIf="categorias.length === 0" class="empty-state">
       <p>No se ha encontrado ninguna categoría.</p>
@@ -27,7 +24,6 @@
       </button>
     </div>
 
-    <!-- Grid de categorías -->
     <div *ngIf="categorias.length > 0" class="categorias-grid">
       <div class="section-header">
         <h1 class="section-title">Explora Nuestras Categorías</h1>

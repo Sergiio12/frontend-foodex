@@ -6,7 +6,7 @@ import { CompraDTO } from '../../model/CompraDTO';
 @Component({
   selector: 'app-administracion',
   standalone: true,
-  imports: [CommonModule], // Importar CommonModule para directivas
+  imports: [CommonModule], 
   templateUrl: './administracion.component.html',
   styleUrl: './administracion.component.css'
 })

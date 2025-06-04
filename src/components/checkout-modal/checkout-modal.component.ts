@@ -72,7 +72,6 @@ export class CheckoutModalComponent {
     this.checkoutForm.reset();
   }
 
-  // Helper para mostrar errores de validación
   getValidationMessage(control: any): string {
     if (control?.errors?.required) {
       return 'Campo requerido';
@@ -89,7 +88,6 @@ export class CheckoutModalComponent {
     return '';
   }
 
-  // Getters para acceder a los controles del formulario
   get direccion() { return this.checkoutForm.get('direccion') as FormGroup; }
   get datosContacto() { return this.checkoutForm.get('datosContacto') as FormGroup; }
   
@@ -103,31 +101,5 @@ export class CheckoutModalComponent {
   get email() { return this.datosContacto.get('email'); }
 
   get comentario() { return this.checkoutForm.get('comentario'); }
-
-  private resetForm(): void {
-    this.submitted = false;
-    
-    this.checkoutForm.reset({ 
-      direccion: {
-        provincia: null 
-      },
-      datosContacto: {
-        email: null
-      }
-    });
-
-    Object.keys(this.checkoutForm.controls).forEach(groupName => {
-      const group = this.checkoutForm.get(groupName) as FormGroup;
-      
-      Object.keys(group.controls).forEach(controlName => {
-        const control = group.get(controlName);
-        control?.setErrors(null);
-        control?.markAsPristine();
-        control?.markAsUntouched();
-      });
-    });
-
-    this.checkoutForm.updateValueAndValidity();
-  }
 
 }

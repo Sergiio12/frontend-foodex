@@ -112,7 +112,6 @@ export class CreateCategoriaModalComponent implements OnInit {
 
     this.categoriasService.createCategoria(nuevaCategoria).pipe(
         switchMap((categoriaCreada) => {
-            // Verificar que categoriaCreada tiene un id válido
             if (!categoriaCreada.id) {
                 throw new Error('La categoría creada no tiene un ID válido');
             }

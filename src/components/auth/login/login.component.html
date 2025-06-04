@@ -21,12 +21,17 @@
 </div>
 
 <main class="login-container">
+  <div class="particles-background"></div>
+  
   <section class="login-card" aria-labelledby="login-title">
+    <div class="card-shine-effect"></div>
+    
     <header class="login-header">
       <h1 id="login-title" class="title">
-        Bienvenido a <span class="brand">SuperMarket</span>
+        Bienvenido a <span class="brand">Foodex</span>
+        <span class="title-underline"></span>
       </h1>
-      <p class="subtitle">Tu tienda online favorita</p>
+      <p class="subtitle">Accede para disfrutar de la experiencia completa.</p>
     </header>
 
     <form 
@@ -38,7 +43,7 @@
         Por favor, completa los campos requeridos para iniciar sesión.
       </p>
 
-      <div class="input-group">
+      <div class="input-container">
         <div class="floating-label">
           <input
             id="username"
@@ -61,8 +66,8 @@
         </div>
       </div>
 
-      <div class="input-group">
-        <div class="floating-label">
+      <div class="input-container">
+        <div class="floating-label password-group">
           <input
             id="password"
             [type]="showPassword ? 'text' : 'password'"
@@ -78,7 +83,7 @@
             class="toggle-password"
             (click)="togglePassword()"
             [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
-            <fa-icon [icon]="showPassword ? faEyeSlash : faEye"></fa-icon>
+            <i class="fas" [class.fa-eye-slash]="showPassword" [class.fa-eye]="!showPassword"></i>
           </button>
         </div>
         <div *ngIf="password.invalid && password.touched" class="error-list">
@@ -100,12 +105,13 @@
             <div class="spinner-circle"></div>
           </div>
         </span>
+        <div class="btn-shine-effect"></div>
       </button>
 
       <div class="links">
         <a routerLink="/signup" class="register-link">
           ¿Primera vez aquí? 
-          <span class="link-highlight">Crea una cuenta</span>
+          <span class="link-highlight">Crea una cuenta<span class="link-underline"></span></span>
         </a>
       </div>
     </form>

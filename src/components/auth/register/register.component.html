@@ -1,10 +1,8 @@
+<!-- Notificación Global -->
 <div
   class="global-notification"
   *ngIf="notification"
-  [ngClass]="{
-    'success': notification.type === 'success',
-    'error': notification.type === 'error',
-    'show': notification }"
+  [ngClass]="{ 'success': notification.type === 'success', 'error': notification.type === 'error', 'show': notification }"
   role="alert"
   aria-live="assertive"
 >
@@ -15,7 +13,8 @@
   <button
     class="close-notification"
     (click)="clearNotification()"
-    aria-label="Cerrar notificación">
+    aria-label="Cerrar notificación"
+  >
     &times;
   </button>
 </div>
@@ -24,7 +23,7 @@
   <section class="register-card" aria-labelledby="register-title">
     <header class="register-header">
       <h1 id="register-title" class="title">
-        Bienvenido a <span class="brand">SuperMarket</span>
+        Bienvenido a <span class="brand">Foodex</span>
       </h1>
       <p class="subtitle">Crea tu cuenta para empezar a disfrutar</p>
     </header>
@@ -33,36 +32,104 @@
       [formGroup]="registerForm"
       (ngSubmit)="onSubmit()"
       class="form"
-      aria-describedby="form-instructions">
+      aria-describedby="form-instructions"
+    >
       <p id="form-instructions" class="sr-only">
         Por favor, completa los campos requeridos para registrarte.
       </p>
 
-      <div class="input-group">
-        <div class="floating-label">
-          <input
-            id="username"
-            type="text"
-            formControlName="username"
-            placeholder=" "
-            [class.invalid]="username.invalid && username.touched"
-            aria-required="true"
-            [attr.aria-invalid]="username.invalid && username.touched"/>
-          <label for="username">Nombre de usuario</label>
-          <div class="input-decoration"></div>
-        </div>
-        <div *ngIf="username.invalid && username.touched" class="error-list">
-          <div *ngIf="username.errors?.['required']" class="error-item">
-            <p>Este campo es obligatorio</p>
+      <!-- Grupo Apellidos -->
+      <div class="form-grid">
+        <div class="input-container">
+          <div class="input-group floating-label">
+            <input
+              id="firstname"
+              type="text"
+              formControlName="firstname"
+              placeholder=" "
+              [class.invalid]="firstname.invalid && firstname.touched"
+              aria-required="true"
+              [attr.aria-invalid]="firstname.invalid && firstname.touched"
+            />
+            <label for="firstname">Primer apellido</label>
           </div>
-          <div *ngIf="username.errors?.['minlength']" class="error-item">
-            <p>El nombre de usuario debe tener al menos 4 caracteres</p>
+          <div *ngIf="firstname.invalid && firstname.touched" class="error-list">
+            <div *ngIf="firstname.errors?.['required']" class="error-item">
+              <p>Este campo es obligatorio</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="input-container">
+          <div class="input-group floating-label">
+            <input
+              id="lastname"
+              type="text"
+              formControlName="lastname"
+              placeholder=" "
+              [class.invalid]="lastname.invalid && lastname.touched"
+              aria-required="true"
+              [attr.aria-invalid]="lastname.invalid && lastname.touched"
+            />
+            <label for="lastname">Segundo apellido</label>
+          </div>
+          <div *ngIf="lastname.invalid && lastname.touched" class="error-list">
+            <div *ngIf="lastname.errors?.['required']" class="error-item">
+              <p>Este campo es obligatorio</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="input-group">
-        <div class="floating-label">
+      <!-- Grupo Nombre y Usuario -->
+      <div class="form-grid">
+        <div class="input-container">
+          <div class="input-group floating-label">
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder=" "
+              [class.invalid]="name.invalid && name.touched"
+              aria-required="true"
+              [attr.aria-invalid]="name.invalid && name.touched"
+            />
+            <label for="name">Nombre</label>
+          </div>
+          <div *ngIf="name.invalid && name.touched" class="error-list">
+            <div *ngIf="name.errors?.['required']" class="error-item">
+              <p>Este campo es obligatorio</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="input-container">
+          <div class="input-group floating-label">
+            <input
+              id="username"
+              type="text"
+              formControlName="username"
+              placeholder=" "
+              [class.invalid]="username.invalid && username.touched"
+              aria-required="true"
+              [attr.aria-invalid]="username.invalid && username.touched"
+            />
+            <label for="username">Nombre de usuario</label>
+          </div>
+          <div *ngIf="username.invalid && username.touched" class="error-list">
+            <div *ngIf="username.errors?.['required']" class="error-item">
+              <p>Este campo es obligatorio</p>
+            </div>
+            <div *ngIf="username.errors?.['minlength']" class="error-item">
+              <p>El nombre de usuario debe tener al menos 4 caracteres</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="input-container">
+        <div class="input-group floating-label">
           <input
             id="email"
             type="email"
@@ -70,9 +137,9 @@
             placeholder=" "
             [class.invalid]="email.invalid && email.touched"
             aria-required="true"
-            [attr.aria-invalid]="email.invalid && email.touched"/>
+            [attr.aria-invalid]="email.invalid && email.touched"
+          />
           <label for="email">Correo electrónico</label>
-          <div class="input-decoration"></div>
         </div>
         <div *ngIf="email.invalid && email.touched" class="error-list">
           <div *ngIf="email.errors?.['required']" class="error-item">
@@ -84,8 +151,9 @@
         </div>
       </div>
 
-      <div class="input-group">
-        <div class="floating-label">
+      <!-- Contraseña -->
+      <div class="input-container">
+        <div class="input-group floating-label password-group">
           <input
             id="password"
             [type]="showPassword ? 'text' : 'password'"
@@ -93,14 +161,15 @@
             placeholder=" "
             [class.invalid]="password.invalid && password.touched"
             aria-required="true"
-            [attr.aria-invalid]="password.invalid && password.touched"/>
+            [attr.aria-invalid]="password.invalid && password.touched"
+          />
           <label for="password">Contraseña</label>
-          <div class="input-decoration"></div>
           <button
             type="button"
             class="toggle-password"
             (click)="togglePassword()"
-            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
             <fa-icon [icon]="showPassword ? faEyeSlash : faEye"></fa-icon>
           </button>
         </div>
@@ -109,18 +178,14 @@
             <p>Este campo es obligatorio</p>
           </div>
           <div *ngIf="password.errors?.['minlength']" class="error-item">
-            <p>La contraseña debe tener al menos 6 caracteres</p>
-          </div>
-        </div>
-        <div *ngIf="registerForm.hasError('passwordMismatch') && (confirmPassword.touched || password.touched)" class="error-list">
-          <div class="error-item">
-            <p>Las contraseñas no coinciden</p>
+            <p>La contraseña debe tener al menos 8 caracteres</p>
           </div>
         </div>
       </div>
 
-      <div class="input-group">
-        <div class="floating-label">
+      <!-- Confirmar Contraseña -->
+      <div class="input-container">
+        <div class="input-group floating-label password-group">
           <input
             id="confirmPassword"
             [type]="showConfirmPassword ? 'text' : 'password'"
@@ -128,14 +193,15 @@
             placeholder=" "
             [class.invalid]="confirmPassword.invalid && confirmPassword.touched"
             aria-required="true"
-            [attr.aria-invalid]="confirmPassword.invalid && confirmPassword.touched"/>
+            [attr.aria-invalid]="confirmPassword.invalid && confirmPassword.touched"
+          />
           <label for="confirmPassword">Confirmar contraseña</label>
-          <div class="input-decoration"></div>
           <button
             type="button"
             class="toggle-password"
             (click)="toggleConfirmPassword()"
-            [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
             <fa-icon [icon]="showConfirmPassword ? faEyeSlash : faEye"></fa-icon>
           </button>
         </div>
@@ -143,26 +209,27 @@
           <div *ngIf="confirmPassword.errors?.['required']" class="error-item">
             <p>Este campo es obligatorio</p>
           </div>
-          <div *ngIf="confirmPassword.errors?.['passwordMismatch']" class="error-item">
-            <p>Las contraseñas no coinciden</p>
-          </div>
         </div>
       </div>
+      
+      <!-- Mensaje de error específico para contraseñas no coincidentes -->
+      <div
+        *ngIf="registerForm.hasError('passwordMismatch') && (confirmPassword.touched || password.touched)"
+        class="password-match-error"
+      >
+        <div class="error-item"><p>Las contraseñas no coinciden</p></div>
+      </div>
 
-      <button
-        type="submit"
-        class="submit-btn"
-        [disabled]="loading"
-        [class.loading]="loading">
+      <!-- Botón de Envío -->
+      <button type="submit" class="submit-btn" [disabled]="loading">
         <span class="btn-content">
           <span class="btn-text" [class.hidden]="loading">Registrar</span>
-          <div *ngIf="loading" class="custom-spinner" aria-hidden="true">
+          <div *ngIf="loading" class="custom-spinner">
             <div class="spinner-circle"></div>
             <div class="spinner-circle"></div>
           </div>
         </span>
       </button>
-
       <div class="links">
         <a routerLink="/login" class="register-link">
           ¿Ya tienes una cuenta?

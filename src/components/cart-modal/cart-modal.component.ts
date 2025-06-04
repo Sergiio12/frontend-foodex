@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common';
 import { Observable, Subject, takeUntil, catchError, throwError, filter, map, distinctUntilChanged, take, shareReplay, tap, combineLatest } from 'rxjs';
 import { ItemCarrito } from '../../model/ItemCarrito';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { isEqual } from 'lodash';
 import { ApiResponseBody } from '../../model/ApiResponseBody';
 import { CarritoResponse } from '../../payloads/CarritoResponse';
 import { CartService } from '../../services/cart.service';

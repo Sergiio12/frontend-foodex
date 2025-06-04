@@ -13,9 +13,6 @@ import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { LoadingModalComponent } from '../load-modal/load-modal.component';
 import { CreateProductoModalComponent } from '../create-producto-modal/create-producto-modal.component';
 import { CartService } from '../../services/cart.service';
-import { ApiResponseBody } from '../../model/ApiResponseBody';
-import { CarritoResponse } from '../../payloads/CarritoResponse';
-import { ItemCarrito } from '../../model/ItemCarrito';
 
 @Component({
   selector: 'app-productos',

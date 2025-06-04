@@ -1,5 +1,4 @@
 <main class="main-content">
-  <!-- Botón flotante de creación solo para admins -->
   <button *ngIf="hasAdminRole()"
           class="floating-create-button"
           (click)="openCreateProductoModal()"
@@ -9,7 +8,6 @@
     </svg>
   </button>
 
-  <!-- Modales de carga y error -->
   <app-loading-modal *ngIf="isLoading"></app-loading-modal>
   <app-error-modal
     *ngIf="errorMessage && !isLoading"
@@ -18,10 +16,8 @@
     (close)="onCloseErrorModal()">
   </app-error-modal>
 
-  <!-- Contenedor principal, sólo si no estamos cargando ni hay error -->
   <ng-container *ngIf="!isLoading && !errorMessage">
     
-    <!-- Estado vacío -->
     <div *ngIf="productos.length === 0" class="empty-state">
       <p>No se encontraron productos en esta categoría.</p>
       <button *ngIf="hasAdminRole()" (click)="openCreateProductoModal()" class="create-first-button">
@@ -29,7 +25,6 @@
       </button>
     </div>
 
-    <!-- Grid de productos -->
     <div *ngIf="productos.length > 0" class="productos-grid">
       <div class="section-header">
         <h1 class="section-title">Nuestros Productos</h1>
@@ -45,7 +40,6 @@
                    [class.card-hover]="hoverState === producto.id">
             
             <div class="card-inner">
-              <!-- Imagen -->
               <div class="image-wrapper">
                 <img
                   [src]="getImageUrl(producto) || 'assets/images/placeholder-product.jpg'"
@@ -56,7 +50,6 @@
                 <div class="image-overlay"></div>
               </div>
 
-              <!-- Contenido -->
               <div class="card-content">
                 <div class="text-content">
                   <h3 class="producto-title">{{ producto.nombre }}</h3>
@@ -76,7 +69,6 @@
                   </div>
                 </div>
 
-                <!-- Botones admin -->
                 <div class="admin-buttons-container" *ngIf="hasAdminRole()">
                   <button class="admin-button edit-button"
                           (click)="editProducto(producto)">
@@ -92,7 +84,6 @@
                   </button>
                 </div>
 
-                <!-- Añadir al carrito -->
                 <div class="user-add-to-cart">
                   <button
                     class="add-to-cart-button"

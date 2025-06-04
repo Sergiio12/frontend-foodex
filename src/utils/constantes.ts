@@ -1,1 +1,1 @@
-export const URL_SERVIDOR = 'https://hood-concerned-farmers-mustang.trycloudflare.com' + '/';
+export const URL_SERVIDOR = 'http://localhost:8080' + '/';
